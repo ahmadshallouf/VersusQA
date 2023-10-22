@@ -260,11 +260,5 @@ def main():
     model.save_pretrained(f"./{config['log']['run_name']}-best/")
     tokenizer.save_pretrained(f"./{config['log']['run_name']}-best/")
 
-    # print("Try an example")
-    # print(predict("What country is better by price and sightseeing: Belarus, Germany or Egypt?"))
-    #
-    # print("Try an example 2")
-    # print(predict("Does H&M look better than Zara?"))
-
 
 main()
