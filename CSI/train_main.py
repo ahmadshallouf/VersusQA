@@ -68,7 +68,7 @@ def main():
     torch.cuda.empty_cache()
     gc.collect()
 
-    os.environ["WANDB_PROJECT"] = "final-csi-" + config["model"]["name"]
+    os.environ["WANDB_PROJECT"] = "final-csi-" + config["log"]["run_name"]
     # os.environ["WANDB_LOG_MODEL"] = "end"
     os.environ["WANDB_WATCH"] = "all"
     os.environ["WANDB_SILENT"] = "false"
