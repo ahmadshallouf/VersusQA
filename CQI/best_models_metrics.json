@@ -1,0 +1,89 @@
+{
+   "models": [
+      {
+         "name": "distilbert-base-uncased-finetuned-sst-2-english",
+         "metrics": {
+               "accuracy": 0.9696969696969697,
+               "f1": 0.970873786407767,
+               "loss": 0.1257062405347824,
+               "precision": 0.9615384615384616,
+               "recall": 0.9803921568627451,
+               "runtime": 1.2003
+         },
+         "hyperparameters": {
+               "learning_rate": 7.121996518301633e-05,
+               "per_device_train_batch_size": 12,
+               "num_train_epochs": 3,
+               "seed": 38
+         }
+      },
+      {
+         "name": "distilbert-base-uncased",
+         "metrics": {
+            "accuracy": 0.9595959595959596 ,
+            "f1": 0.9534883720930233 ,
+            "loss": 0.13465926051139832 ,
+            "precision": 0.9111111111111111 ,
+            "recall": 1.0 ,
+            "runtime": 1.1765
+         },
+         "hyperparameters" : {
+               "learning_rate": 3.12349072212078e-05,
+               "per_device_train_batch_size": 16,
+               "num_train_epochs": 3,
+               "seed": 25.47004662655393
+         }
+      },
+      {
+         "name": "prajjwal1/bert-tiny",
+         "metrics": {
+            "accuracy": 0.9191919191919192,
+            "f1": 0.9148936170212766,
+            "loss": 0.3410385847091675,
+            "precision": 0.9148936170212766,
+            "recall": 0.9148936170212766,
+            "runtime": 0.125
+         },
+         "hyperparameters": {
+               "learning_rate": 4.325432427964566e-05,
+               "per_device_train_batch_size": 4,
+               "num_train_epochs": 5,
+               "seed": 2.278085221247628
+         }
+      },
+      {
+        "name": "roberta-base",
+        "metrics": {
+          "accuracy": 0.9595959595959596,
+          "f1": 0.96,
+          "loss": 0.19162563979625702,
+          "precision": 0.9411764705882353,
+          "recall": 0.9795918367346939,
+          "runtime": 1.118
+        },
+         "hyperparameters": {
+            "learning_rate": 1.5751320499779757e-05,
+            "per_device_train_batch_size": 10,
+            "num_train_epochs": 4,
+            "seed": 8.239780813448107
+         }
+      },
+      {
+        "name": "microsoft/deberta-base",
+        "metrics": {
+          "accuracy": 0.9595959595959596,
+          "f1": 0.9545454545454545,
+          "loss": 0.21411211788654327,
+          "precision": 0.9333333333333333,
+          "recall": 0.9767441860465116,
+          "runtime": 1.5277
+        },
+         "hyperparameters": {
+            "learning_rate": 2.6070247583707743e-05,
+            "per_device_train_batch_size": 9,
+            "num_train_epochs": 3,
+            "seed": 40.79639408647977
+         }
+      }
+   ]
+}
