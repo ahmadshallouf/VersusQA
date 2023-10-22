@@ -2,12 +2,11 @@ import gradio as gr
 import torch
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
+model = AutoModelForSequenceClassification.from_pretrained("uhhlt/stance-comp-classifier", num_labels=3)  # .to("cuda")
+tokenizer = AutoTokenizer.from_pretrained('uhhlt/stance-comp-classifier')
+
 
 def test(sentence):
-    model = AutoModelForSequenceClassification.from_pretrained("model_binary_classifier", num_labels=3)  # .to("cuda")
-
-    tokenizer = AutoTokenizer.from_pretrained('./model_binary_classifier/')
-
     inputs = tokenizer(sentence, return_tensors="pt")  # .to("cuda")
 
     with torch.no_grad():
