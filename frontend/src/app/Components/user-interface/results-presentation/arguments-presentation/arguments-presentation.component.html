@@ -1,0 +1,21 @@
+<mat-card>
+<div style="display: flex; width: 100%; font-size: 16px;">
+    <div style="width: 50%">
+        <h1>Arguments for {{(state.state$ | async)?.objectOne}}</h1>
+        <div *ngFor="let arg of (state.state$ | async)?.objectOneArguments; index as i" style="font-size: 18px; margin-left: 3px">
+            <a href="{{arg.source}}">[<img src="{{'https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url='+cropDomain(arg.source)+'&size=16'}}" alt=""> {{extractDomain(cropDomain(arg.source))}}]</a><span >  {{arg.value}}</span>
+            <br>
+            <br>
+        </div>
+    </div>
+    <div style="width: 2px; background: black; margin-right: 0px"></div>
+    <div style="width: 50%;">
+        <h1>Arguments for {{(state.state$ | async)?.objectTwo}}</h1>
+        <div *ngFor="let arg of (state.state$ | async)?.objectTwoArguments; index as i" style="font-size: 18px;  margin-left: 3px">
+            <a href="{{arg.source}}">[<img src="{{'https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url='+cropDomain(arg.source)+'&size=16'}}" alt=""> {{extractDomain(cropDomain(arg.source))}}]</a><span >  {{arg.value}}</span>
+            <br>
+            <br>
+        </div>
+    </div>
+</div>
+</mat-card>

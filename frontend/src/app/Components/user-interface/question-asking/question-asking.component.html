@@ -1,0 +1,27 @@
+<mat-card>
+  <div style="margin: 25px;">
+  <form (ngSubmit)="submitQuestion()" >
+    <div>
+      <mat-form-field class="question-input" style="width: 100%;">
+        <input
+                matInput
+                placeholder="Question"
+                [(ngModel)]="question"
+                name="question"
+                required
+                style='font-size: 20px;'
+                [disabled]="!!(viewState|async)?.processing"
+        >
+      </mat-form-field>
+
+      <div style=" text-align: center; width: 100%;">
+        <button mat-raised-button color="primary" type="submit" style="margin: 10px; font-size: 16px;" [disabled]="!!(viewState|async)?.processing">
+          Ask
+        </button>
+        <mat-checkbox [(ngModel)]="fastAnswer" name="fastSearch" style="transform: scale(1.2);">Faster Answer</mat-checkbox>
+      </div>
+
+    </div>
+  </form>
+  </div>
+</mat-card>

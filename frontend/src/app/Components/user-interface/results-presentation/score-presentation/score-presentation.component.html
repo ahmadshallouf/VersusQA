@@ -1,0 +1,14 @@
+<mat-card>
+<div style="margin: 15px">
+  <br>
+  <div style="width: 100%; display: flex;">
+    <div style="width: 50%; font-size: 20px">
+      <span>{{(state.state$|async)?.objectOne}} ({{(objectOneScore * 100).toFixed(2)}}%)</span>
+    </div>
+    <div style="width: 50%; text-align: end; font-size: 20px">
+     <span>({{((1-objectOneScore) * 100).toFixed(2)}}%) {{(state.state$|async)?.objectTwo}}</span>
+    </div>
+    </div>
+  <mat-progress-bar mode="determinate" value="{{(objectOneScore * 100)}}"></mat-progress-bar>
+</div>
+</mat-card>

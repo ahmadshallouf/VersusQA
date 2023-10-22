@@ -1,0 +1,25 @@
+<mat-card>
+  <div style="text-align: center; margin: 15px">
+  <mat-card-content *ngIf="(state.state$ | async)?.isComparative">
+    <h2>Your question is comparative!</h2>
+    <button mat-raised-button
+            color="primary"
+            (click)="reportIsComparative()"
+            [disabled]='!!((viewState|async)?.processing)'
+    >
+      No. It is not.
+    </button>
+  </mat-card-content>
+
+  <mat-card-content *ngIf="!(state.state$ | async)?.isComparative">
+    <h2>Your question is not comparative!</h2>
+    <button mat-raised-button
+            color="primary"
+            (click)="reportIsComparative()"
+            [disabled]='!!((viewState|async)?.processing)'
+    >
+      Yes. It is.
+    </button>
+  </mat-card-content>
+  </div>
+</mat-card>

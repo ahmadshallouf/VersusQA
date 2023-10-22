@@ -1,0 +1,24 @@
+<div>
+  <app-question-asking></app-question-asking>
+  <br>
+
+  <app-is-comparative *ngIf="(viewState|async)?.receivedIsComparative"></app-is-comparative>
+  <br>
+
+  <app-objects-and-aspects *ngIf="(viewState|async)?.receivedObjectsAndAspects"></app-objects-and-aspects>
+  <br>
+
+  <app-score-presentation *ngIf="(viewState|async)?.receivedArguments"></app-score-presentation>
+  <br>
+
+  <app-summary-presentation *ngIf="(viewState|async)?.receivedSummary"></app-summary-presentation>
+  <br>
+
+  <app-arguments-presentation *ngIf="(viewState|async)?.receivedArguments"></app-arguments-presentation>
+  <br>
+
+  <div *ngIf='showLoading' class="text-center">
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+    <small>Processing</small>
+  </div>
+</div>

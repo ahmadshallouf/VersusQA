@@ -1,0 +1,57 @@
+version: '3.7'
+
+services:
+  frontend:
+    container_name: CQA-frontend
+    build: ../frontend
+    expose:
+      - "4200"
+    ports:
+      - "4200:4200"
+    depends_on:
+      - webserver
+  webserver:
+    container_name: CQA-server
+    build: .
+    expose:
+      - "8080"
+    ports:
+      - "8080:8080"
+    privileged: true
+    depends_on:
+      - cqi
+      - oai
+      - cqas
+      - csi
+      - db
+  cqi:
+    build: ../CQI
+    ports:
+      - "8001:8001"
+  oai:
+    build: ../OAI
+    ports:
+      - "8002:8002"
+  csi:
+    build: ../CSI
+    ports:
+      - "8003:8003"
+  cqas:
+    build: ../CQAS
+    ports:
+      - "8004:8004"
+  db:
+    image: postgres:latest
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=admin
+    expose:
+      - '5432'
+    ports:
+      - '5433:5432'
+    volumes:
+      - db:/var/lib/postgresql/data
+volumes:
+    db:
+     driver: local

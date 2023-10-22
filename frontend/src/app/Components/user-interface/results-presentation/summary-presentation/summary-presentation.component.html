@@ -1,0 +1,8 @@
+<mat-card>
+    <div style="margin: 25px">
+        <br>
+        <h1>Summary</h1>
+        <p style="font-size: 18px">{{(state.state$ | async)?.summary}}</p>
+    </div>
+    <app-summary-feedback></app-summary-feedback>
+</mat-card>

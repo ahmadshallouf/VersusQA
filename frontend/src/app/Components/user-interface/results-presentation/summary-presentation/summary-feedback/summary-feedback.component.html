@@ -1,0 +1,10 @@
+<div style="display: flex; font-size: 18px; margin: 25px;">
+    <form style="width: 100%; display: flex">
+        <div style="width: 30%; margin-top: 10px" >
+            <span>Was this summary: </span>
+        </div>
+        <mat-checkbox [(ngModel)]="useful" name="useful" style="transform: scale(1.2); width: 20%;">Useful</mat-checkbox>
+        <mat-checkbox [(ngModel)]="fluent" name="fluent" style="transform: scale(1.2); width: 20%;">Fluent</mat-checkbox>
+        <button mat-raised-button color="primary" (click)="submitFeedback()" style="width: 20%; margin-top: 5px%">Submit</button>
+    </form>
+</div>
