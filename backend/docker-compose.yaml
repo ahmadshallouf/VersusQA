@@ -33,7 +33,7 @@ services:
     ports:
       - "8002:8002"
   csi:
-    build: ../CSI
+    build: ../SC
     ports:
       - "8003:8003"
   cqas:
