@@ -39,4 +39,4 @@ python main.py
 
 ## Hyperparameter Training
 
-If you want to optimize the hyperparameters of a new model from HuggingFace, please uncomment respective lines in the `train_main.py` file and run the code.
+If you want to optimize the hyperparameters of a new model from HuggingFace, please uncomment the respective lines in the `train_main.py` file and run the code.
