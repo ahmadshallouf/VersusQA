@@ -410,3 +410,8 @@ baseline.json
 # Husky
 .husky/_
 aio/content/examples/.DS_Store
+/SC/model/
+/OAI/models/
+/frontend/.angular/
+/CQI/model/
+/CQAS/model/
