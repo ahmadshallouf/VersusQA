@@ -3,8 +3,6 @@
 
 [![UHH](https://www.kus.uni-hamburg.de/5572339/uhh-logo-2010-29667bd15f143feeb1ebd96b06334fddfe378e09.png)](https://www.uni-hamburg.de/) -  <a href="https://www.inf.uni-hamburg.de/en/inst/ab/sems/home.html"><img src="https://www.inf.uni-hamburg.de/5546980/lt-logo-640x361-9345df620ffab7a8ce97149b66c2dfc9d3ff429e.png" width="200" height="100" /></a>
 
-**This is a sub-repository of the main system. If you're looking for the full project please visit [this repository.](https://github.com/ahmadshallouf/Comparative-QA)**
-
 **Due to size problems, the model can't be found in this repository but it can be easily recreated, as explained below**
 
 The Comparative Question Identification Model is a transformer-based classification model created for the identification of comparative questions. 
@@ -64,6 +62,3 @@ If you wish to test a new pre-trained model you may do so by modifying the file 
 python hyperparameter_training.py
 ```
 
-## License
-
-Apache License version 2.0
