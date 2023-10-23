@@ -6,7 +6,7 @@
 
 ## Dataset
 
-The original dataset is represented by two files: `comparg_train.tsv` and `comparg_test.tsv`. A split has been created using `data_preparation.py`.
+The original dataset from [Panchenko et al., 2019](https://aclanthology.org/W19-4516/) is represented by two files: `comparg_train.tsv` and `comparg_test.tsv`. A split has been created using `data_preparation.py`.
 
 ## Training
 
