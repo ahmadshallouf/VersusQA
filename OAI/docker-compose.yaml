@@ -5,3 +5,5 @@ services:
     build: .
     ports:
       - "8002:8002"
+    volumes:
+        - .:/app

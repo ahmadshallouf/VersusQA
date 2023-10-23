@@ -2,13 +2,20 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 import torch
-
+import os
 # ====================== API ==========================
 app = FastAPI()  # Create the API on Port 8000
 
-model = AutoModelForSequenceClassification.from_pretrained("model_binary_classifier", num_labels=3)  # .to("cuda")
-tokenizer = AutoTokenizer.from_pretrained('./model_binary_classifier/')
-
+if not os.listdir('model'):
+    print("Downloading model...")
+    model = AutoModelForSequenceClassification.from_pretrained("uhhlt/stance-comp-classifier", num_labels=3)  # .to("cuda")
+    tokenizer = AutoTokenizer.from_pretrained('uhhlt/stance-comp-classifier')
+    model.save_pretrained('model')
+    tokenizer.save_pretrained('model')
+else:
+    print("Loading model...")
+    model = AutoModelForSequenceClassification.from_pretrained("model", num_labels=3)
+    tokenizer = AutoTokenizer.from_pretrained('model')
 
 class argument(BaseModel):
     value: str
@@ -86,7 +93,7 @@ async def get_arguments(item: request):
             arguments2.append(shadow_arguments[i])
         elif cl == 1 and conc_arguments[i][0] is True:
             arguments1.append(shadow_arguments[i])
-
+    print('args1: ' + str(arguments1) + ' args2: ' + str(arguments2))
     return response(arguments1=arguments1, arguments2=arguments2)
 
 # ====================== ML ==========================

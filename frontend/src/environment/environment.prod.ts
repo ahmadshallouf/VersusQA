@@ -1,3 +1,3 @@
 export const environment = {
-  apiUrl: 'http://localhost:8080/'
+  apiUrl: 'https://cam-v2.ltdemos.informatik.uni-hamburg.de/backend/'
 };

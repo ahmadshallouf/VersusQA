@@ -2,11 +2,20 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from summarizer import generate_summary
 from transformers import BartForConditionalGeneration, AutoTokenizer
+import os
 
 app = FastAPI()  # Running on port 8002
-tokenizer = AutoTokenizer.from_pretrained("production-model")
-model = BartForConditionalGeneration.from_pretrained("production-model")
 
+if not os.listdir('model'):
+    print("Downloading model...")
+    tokenizer = AutoTokenizer.from_pretrained("uhhlt/comp-summarization-distilbart-cnn")
+    model = BartForConditionalGeneration.from_pretrained("uhhlt/comp-summarization-distilbart-cnn")
+    model.save_pretrained('model')
+    tokenizer.save_pretrained('model')
+else:
+    print("Loading model...")
+    tokenizer = AutoTokenizer.from_pretrained("model")
+    model = BartForConditionalGeneration.from_pretrained("model")
 # ====================== Models ==========================
 
 class Item(BaseModel):

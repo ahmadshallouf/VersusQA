@@ -7,7 +7,7 @@ services:
     expose:
       - "4200"
     ports:
-      - "4200:4200"
+      - "15557:4200"
     depends_on:
       - webserver
   webserver:
@@ -16,7 +16,7 @@ services:
     expose:
       - "8080"
     ports:
-      - "8080:8080"
+      - "15558:8080"
     privileged: true
     depends_on:
       - cqi
@@ -27,19 +27,27 @@ services:
   cqi:
     build: ../CQI
     ports:
-      - "8001:8001"
+      - "15559:8001"
+    volumes:
+      - cqi:/app
   oai:
     build: ../OAI
     ports:
-      - "8002:8002"
+      - "15560:8002"
+    volumes:
+      - oai:/app
   csi:
     build: ../SC
     ports:
-      - "8003:8003"
+      - "15561:8003"
+    volumes:
+        - csi:/app
   cqas:
     build: ../CQAS
     ports:
-      - "8004:8004"
+      - "15562:8004"
+    volumes:
+        - cqas:/app
   db:
     image: postgres:latest
     restart: always
@@ -49,9 +57,17 @@ services:
     expose:
       - '5432'
     ports:
-      - '5433:5432'
+      - '15563:5432'
     volumes:
       - db:/var/lib/postgresql/data
 volumes:
-    db:
-     driver: local
+  db:
+    driver: local
+  cqi:
+    driver: local
+  oai:
+    driver: local
+  csi:
+    driver: local
+  cqas:
+    driver: local

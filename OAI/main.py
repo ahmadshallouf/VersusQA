@@ -22,14 +22,29 @@ config = load_config("configuration.yaml")
 
 app = FastAPI()  # Running on port 8000
 
-token_classifier = pipeline(
-    "token-classification", model=config["data"]["last_model_path"],
-    aggregation_strategy=config["test"]["pipeline_aggregation_strategy"])
+if not os.listdir('models/best'):
+    print("Downloading best model...")
+    token_classifier = pipeline(
+        "token-classification", model=config["data"]["last_model_path"],
+        aggregation_strategy=config["test"]["pipeline_aggregation_strategy"])
+    token_classifier.save_pretrained('models/best')
+else:
+    print("Loading best model...")
+    token_classifier = pipeline(
+        "token-classification", model='models/best',
+        aggregation_strategy=config["test"]["pipeline_aggregation_strategy"])
 
-token_classifier_fast = pipeline(
-    "token-classification", model=config["data"]["fast_model_path"],
-    aggregation_strategy=config["test"]["pipeline_aggregation_strategy"])
-
+if not os.listdir('models/fast'):
+    print("Downloading fast model...")
+    token_classifier_fast = pipeline(
+        "token-classification", model=config["data"]["fast_model_path"],
+        aggregation_strategy=config["test"]["pipeline_aggregation_strategy"])
+    token_classifier_fast.save_pretrained('models/fast')
+else:
+    print("Loading fast model...")
+    token_classifier_fast = pipeline(
+        "token-classification", model='models/fast',
+        aggregation_strategy=config["test"]["pipeline_aggregation_strategy"])
 
 
 @app.get("/")

@@ -11,7 +11,6 @@ RUN mvn install -DskipTests
 FROM maven
 ENV ARTIFACT_NAME=Comparative-Question-Answering---Backend-0.0.1-SNAPSHOT.jar
 ENV APP_HOME=/usr/app/
-
 ENV CQI_URL=http://cqi:8001/is_comparative
 ENV OAI_URL=http://oai:8002/get_objects_and_aspects
 ENV CAM_URL=http://ltdemos.informatik.uni-hamburg.de/cam-api
