@@ -5,6 +5,8 @@ from transformers import BartForConditionalGeneration, AutoTokenizer
 import os
 
 app = FastAPI()  # Running on port 8002
+if not os.path.exists('model'):
+    os.makedirs('model')
 
 if not os.listdir('model'):
     print("Downloading model...")

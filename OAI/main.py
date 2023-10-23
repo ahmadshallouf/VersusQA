@@ -22,6 +22,15 @@ config = load_config("configuration.yaml")
 
 app = FastAPI()  # Running on port 8000
 
+if not os.path.exists('models'):
+    os.makedirs('models')
+
+if not os.path.exists('models/best'):
+    os.makedirs('models/best')
+
+if not os.path.exists('models/fast'):
+    os.makedirs('models/fast')
+
 if not os.listdir('models/best'):
     print("Downloading best model...")
     token_classifier = pipeline(

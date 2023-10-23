@@ -6,6 +6,10 @@ import os
 # ====================== API ==========================
 app = FastAPI()  # Create the API on Port 8000
 
+#if directory model does not exist, create it
+if not os.path.exists('model'):
+    os.makedirs('model')
+
 # if folder model is empty, download the model
 print(os.listdir('model'))
 if not os.listdir('model'):

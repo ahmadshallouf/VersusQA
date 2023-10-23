@@ -6,6 +6,9 @@ import os
 # ====================== API ==========================
 app = FastAPI()  # Create the API on Port 8000
 
+if not os.path.exists('model'):
+    os.makedirs('model')
+
 if not os.listdir('model'):
     print("Downloading model...")
     model = AutoModelForSequenceClassification.from_pretrained("uhhlt/stance-comp-classifier", num_labels=3)  # .to("cuda")
