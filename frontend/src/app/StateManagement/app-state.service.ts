@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {environment} from "../../environment/environment";
+import {environment} from "../../environments/environment";
 import {BehaviorSubject} from "rxjs";
 import {StateModel} from "./model/state.model";
 import {HttpClient} from "@angular/common/http";
@@ -15,7 +15,7 @@ import {SummaryResponse} from "./interfaces/summary-response";
 export class AppStateService {
 
 
-    private readonly _apiUrl = "http://localhost:8080";
+    private readonly _apiUrl = environment.apiUrl;
 
     private readonly _state = new BehaviorSubject<StateModel>(
         {
@@ -68,6 +68,8 @@ export class AppStateService {
     public readonly state$ = this._state.asObservable();
 
     constructor(public http: HttpClient) {
+        console.log('AppStateService created');
+        console.log(this._apiUrl)
     }
 
     private _setState(state: any): void {
