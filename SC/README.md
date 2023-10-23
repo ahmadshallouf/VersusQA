@@ -6,7 +6,7 @@
 
 ## Dataset
 
-The original dataset is represented by two files: `comparg_train.tsv` and `comparg_test.tsv`. A split (train 70%, validation 9%, test 21%) has been created.
+The original dataset is represented by two files: `comparg_train.tsv` and `comparg_test.tsv`. A split has been created using `data_preparation.py`.
 
 ## Training
 
