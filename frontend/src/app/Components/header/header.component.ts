@@ -37,7 +37,7 @@ export class HeaderComponent {
   }
 
   goToGit() {
-    window.location.href = 'https://github.com/ahmadshallouf/Comparative-QA';
+    window.location.href = 'https://github.com/ahmadshallouf/VersusQA';
   }
 
 
