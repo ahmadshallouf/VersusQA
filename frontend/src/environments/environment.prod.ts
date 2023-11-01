@@ -1,3 +1,3 @@
 export const environment = {
-  apiUrl: 'https://cam-v2.ltdemos.informatik.uni-hamburg.de/api'
+  apiUrl: 'https://cam-v2-api.ltdemos.informatik.uni-hamburg.de'
 };

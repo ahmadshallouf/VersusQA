@@ -6,7 +6,7 @@
 
 ## Dataset
 
-The original dataset is represented by two files: `comparg_train.tsv` and `comparg_test.tsv`. A split (train 70%, validation 9%, test 21%) has been created.
+The original dataset from [Panchenko et al., 2019](https://aclanthology.org/W19-4516/) is represented by two files: `comparg_train.tsv` and `comparg_test.tsv`. A split has been created using `data_preparation.py`.
 
 ## Training
 
@@ -40,4 +40,4 @@ python main.py
 
 ## Hyperparameter Training
 
-If you want to optimize the hyperparameters of a new model from HuggingFace, please uncomment respective lines in the `train_main.py` file and run the code.
+If you want to optimize the hyperparameters of a new model from HuggingFace, please uncomment the respective lines in the `train_main.py` file and run the code.

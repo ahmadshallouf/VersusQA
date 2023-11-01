@@ -1,7 +1,7 @@
 # VersusQA
 ## Introduction
 
-This is a repository for the VersusQA project. The goal of this project is to create a question answering system that can answer questions about the differences between two entities. For example, given the entities "Barack Obama" and "Donald Trump", the system should be able to answer questions such as "Who is older?" or "Who is taller?".
+This is a repository for the VersusQA project. The goal of this project is to create a question answering system that can answer questions about the differences between two entities. For example, given the entities "Harry Potter" and "LotR", the system is able to answer a question such as "What is better: Harry Potter or LotR?". The arguments for "Harry Potter" and "LotR" are displayed along with a clear and coherent summary.
 
 ## Sub-Reposities
 
