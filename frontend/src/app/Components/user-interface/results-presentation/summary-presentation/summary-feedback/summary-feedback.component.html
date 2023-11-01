@@ -5,6 +5,12 @@
         </div>
         <mat-checkbox [(ngModel)]="useful" name="useful" style="transform: scale(1.2); width: 20%;">Useful</mat-checkbox>
         <mat-checkbox [(ngModel)]="fluent" name="fluent" style="transform: scale(1.2); width: 20%;">Fluent</mat-checkbox>
-        <button mat-raised-button color="primary" (click)="submitFeedback()" style="width: 20%; margin-top: 5px%">Submit</button>
+        <button
+                mat-raised-button color="primary"
+                (click)="submitFeedback()" style="width: 20%; margin-top: 5px"
+                [disabled]="!!((viewState | async)?.submittedFeedback)"
+        >
+            {{!!((viewState|async)?.receivedFeedback)? 'Received Feedback' : 'Submit'}}
+        </button>
     </form>
 </div>

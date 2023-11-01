@@ -20,4 +20,6 @@ export interface viewStateModel {
     receivedArguments: boolean;
     receivedSummary: boolean;
     processing: boolean;
+    submittedFeedback: boolean;
+    receivedFeedback: boolean;
 }

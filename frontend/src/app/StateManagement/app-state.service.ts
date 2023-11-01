@@ -20,11 +20,13 @@ export class AppStateService {
     private readonly _state = new BehaviorSubject<StateModel>(
         {
             viewState: {
-                receivedIsComparative: false,
-                receivedObjectsAndAspects: false,
-                receivedArguments: false,
-                receivedSummary: false,
-                processing: false
+                receivedIsComparative: true,
+                receivedObjectsAndAspects: true,
+                receivedArguments: true,
+                receivedSummary: true,
+                processing: false,
+                submittedFeedback: false,
+                receivedFeedback: false
             },
             question: 'What is tastier apples or oranges?',
             isComparative: true,
@@ -205,6 +207,8 @@ export class AppStateService {
 
     public querySummary(ObjectOneArguments: ArgumentModel[], ObjectTwoArguments: ArgumentModel[]) {
         let new_state = this.getState();
+        new_state.viewState.submittedFeedback = true;
+        new_state.receivedFeedback = false;
         new_state.viewState.processing = true;
         new_state.viewState.receivedSummary = false;
         this._setState(new_state);
@@ -221,9 +225,33 @@ export class AppStateService {
             if (response) {
                 state.summary = response.summary;
                 state.viewState.receivedSummary = true;
+                state.submittedFeedback = false;
+                state.receivedFeedback = false;
             }
             state.viewState.processing = false;
             this._setState(state);
+        });
+    }
+
+    public submitSummaryFeedback(useful: boolean, fluent: boolean) {
+        let newState = this.getState();
+        newState.viewState.submittedFeedback = true;
+        this._setState(newState);
+        this.http.post(this._apiUrl + '/summary_feedback', {
+            question: this.getState().question,
+            arguments: this.getState().objectOneArguments
+                .concat(this.getState().objectTwoArguments)
+                .map((argument : ArgumentModel) => {
+                    return argument.value;
+                    })
+                .join(' [SEP] '),
+            summary: this.getState().summary,
+            useful: useful,
+            fluent: fluent}
+        ).subscribe((response) => {
+            let newState = this.getState();
+            newState.viewState.receivedFeedback = true;
+            this._setState(newState);
         });
     }
 }

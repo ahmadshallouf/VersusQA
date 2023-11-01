@@ -3,8 +3,10 @@ package com.winlp.backend.controllers;
 import com.winlp.backend.dtos.*;
 import com.winlp.backend.entities.ComparativeQuestion;
 import com.winlp.backend.entities.ObjectsAndAspects;
+import com.winlp.backend.entities.SummaryFeedback;
 import com.winlp.backend.repositories.ComparativeQuestionRepository;
 import com.winlp.backend.repositories.ObjectsAndAspectsRepository;
+import com.winlp.backend.repositories.SummaryFeedbackRepository;
 import com.winlp.backend.services.ClusterService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +23,9 @@ public class MainController {
 
     @Autowired
     private ObjectsAndAspectsRepository objectsAndAspectsRepository;
+
+    @Autowired
+    private SummaryFeedbackRepository summaryFeedbackRepository;
 
     @Autowired
     private ClusterService clusterService;
@@ -130,6 +135,22 @@ public class MainController {
                 aspects.get(3),
                 aspects.get(4)));
         objectsAndAspectsRepository.flush();
+    }
+
+    /**
+     * endpoint for recieving feedback on Summary
+     */
+    @PostMapping("/summary_feedback")
+    public void summaryFeedback(@RequestBody SummaryFeedbackRequest request) {
+        System.out.println("reporting summary feedback: " + request);
+        summaryFeedbackRepository.save(new SummaryFeedback(
+                request.question(),
+                request.arguments(),
+                request.summary(),
+                request.useful(),
+                request.fluent()
+        ));
+        summaryFeedbackRepository.flush();
     }
 
 }

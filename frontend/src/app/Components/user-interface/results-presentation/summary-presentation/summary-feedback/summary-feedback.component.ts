@@ -1,4 +1,6 @@
 import { Component } from '@angular/core';
+import {AppStateService} from "../../../../../StateManagement/app-state.service";
+import {map} from "rxjs";
 
 @Component({
   selector: 'app-summary-feedback',
@@ -11,11 +13,16 @@ export class SummaryFeedbackComponent {
     fluent = false;
 
     constructor(
+        private state: AppStateService
     )
     { }
 
-    submitFeedback(): void {
+    viewState = this.state.state$.pipe(
+        map(state => state.viewState)
+    );
 
+    submitFeedback(): void {
+        this.state.submitSummaryFeedback(this.useful, this.fluent);
     }
 
 }
