@@ -5,7 +5,6 @@ services:
     container_name: CQA-frontend
     build:
       context: ../frontend
-      dockerfile: ../frontend/Dockerfile
       args:
         PROFILE: production
     expose:
