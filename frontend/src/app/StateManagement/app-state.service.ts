@@ -20,10 +20,10 @@ export class AppStateService {
     private readonly _state = new BehaviorSubject<StateModel>(
         {
             viewState: {
-                receivedIsComparative: true,
-                receivedObjectsAndAspects: true,
-                receivedArguments: true,
-                receivedSummary: true,
+                receivedIsComparative: false,
+                receivedObjectsAndAspects: false,
+                receivedArguments: false,
+                receivedSummary: false,
                 processing: false,
                 submittedFeedback: false,
                 receivedFeedback: false

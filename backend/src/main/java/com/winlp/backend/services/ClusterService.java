@@ -42,7 +42,12 @@ public class ClusterService {
      * @return True if the question is comparative, false otherwise.
      */
     public boolean isComparative(String question) {
-        return Boolean.TRUE.equals(restTemplate.getForObject(cqiUrl + "/" + question, boolean.class));
+        System.out.println("===========================================");
+        System.out.println("making CQI request to: " + cqiUrl + "/" + question);
+        boolean ans = Boolean.TRUE.equals(restTemplate.getForObject(cqiUrl + "/" + question, boolean.class));
+        System.out.println("CQI response: " + ans);
+        System.out.println("===========================================");
+        return ans;
     }
 
     /**
@@ -53,7 +58,12 @@ public class ClusterService {
      */
     public ObjectsAndAspectsResponse getObjectsAndAspects(String question, boolean faster) {
         // Call the object and aspect detection API
-        return restTemplate.getForObject(oaiUrl + "/" + faster + "/" + question, ObjectsAndAspectsResponse.class);
+        System.out.println("===========================================");
+        System.out.println("making OAI request to: " + oaiUrl + "/" + faster + "/" + question);
+        ObjectsAndAspectsResponse response = restTemplate.getForObject(oaiUrl + "/" + faster + "/" + question, ObjectsAndAspectsResponse.class);
+        System.out.println("OAI response: " + response);
+        System.out.println("===========================================");
+        return response;
     }
 
     /**
@@ -70,8 +80,9 @@ public class ClusterService {
         }
 
         String url = urlBuilder.toString();
+        System.out.println("===========================================");
         System.out.println("making CAM request to: " + url);
-
+        System.out.println("===========================================");
         CamApiResponse response = restTemplate.getForObject(urlBuilder.toString(), CamApiResponse.class);
 
         double score = response.object1.totalPoints / (response.object1.totalPoints + response.object2.totalPoints);
@@ -94,7 +105,13 @@ public class ClusterService {
      * @return A response containing the sentences.
      */
     public SentenceIdentificationResponse classifySentences(SentenceIdentificationRequest request) {
-        return restTemplate.postForObject(csiUrl, request, SentenceIdentificationResponse.class);
+        System.out.println("===========================================");
+        System.out.println("making CSI request to: " + csiUrl);
+        System.out.println("request: " + request);
+        SentenceIdentificationResponse response = restTemplate.postForObject(csiUrl, request, SentenceIdentificationResponse.class);
+        System.out.println("CSI response: " + response);
+        System.out.println("===========================================");
+        return response;
     }
 
 
@@ -105,6 +122,12 @@ public class ClusterService {
      * @return A string containing the summary of the arguments.
      */
     public String getSummary(List<String> arguments, String object1, String object2) {
-        return restTemplate.postForObject(cqasUrl, new SummaryRequest(object1, object2, arguments), String.class);
+        System.out.println("===========================================");
+        System.out.println("making CQAS request to: " + cqasUrl);
+        System.out.println("arguments: " + arguments);
+        String Summary = restTemplate.postForObject(cqasUrl, new SummaryRequest(object1, object2, arguments), String.class);
+        System.out.println("CQAS response: " + Summary);
+        System.out.println("===========================================");
+        return Summary;
     }
 }

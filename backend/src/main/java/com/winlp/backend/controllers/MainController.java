@@ -31,11 +31,9 @@ public class MainController {
     private ClusterService clusterService;
 
     // ------------------- GET -------------------
-    // TODO: add swagger
 
     @GetMapping("/")
-    public String index() { return "Welcome to comparative question answering API." +
-            "Use /ask/{question} for comparative question answering."; }
+    public String index() { return "Welcome to comparative question answering API. Check Swagger for Docs"; }
 
     // ======================
 
