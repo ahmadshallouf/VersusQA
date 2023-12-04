@@ -1,6 +1,9 @@
 version: '3.7'
 services:
   frontend:
-    build: .
+    build:
+        context: ../frontend
+        args:
+            PROFILE: local
     ports:
       - '4200:4200' # Port mapping

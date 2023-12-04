@@ -1,9 +1,12 @@
-version: '3.7'
+version: '3.0'
 
 services:
   frontend:
     container_name: CQA-frontend
-    build: ../frontend
+    build:
+      context: ../frontend
+      args:
+        PROFILE: docker
     expose:
       - "4200"
     ports:
@@ -41,13 +44,13 @@ services:
     ports:
       - "15561:8003"
     volumes:
-        - csi:/app
+      - csi:/app
   cqas:
     build: ../CQAS
     ports:
       - "15562:8004"
     volumes:
-        - cqas:/app
+      - cqas:/app
   db:
     image: postgres:latest
     restart: always
