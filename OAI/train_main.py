@@ -80,7 +80,7 @@ def compute_metrics(eval_preds):
         true_predictions.append([])
         true_labels.append([])
         for p, l, t in zip(prediction, label, tokens):
-            if l != -100 and tokenizer.convert_ids_to_tokens(int(t)).startswith("__"):
+            if l != -100 and tokenizer.convert_ids_to_tokens(int(t)).startswith("▁"):
                 true_predictions[-1].append(LABEL_LIST[p])
                 true_labels[-1].append(LABEL_LIST[l])
 
