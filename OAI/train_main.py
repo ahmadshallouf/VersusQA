@@ -1,4 +1,3 @@
-import ast
 import os
 import random
 
@@ -7,13 +6,9 @@ import numpy as np
 import pandas as pd
 import torch
 import yaml
-from datasets import Dataset, DatasetDict, load_metric
-from main import predict
+from datasets import Dataset, DatasetDict
 from ray import tune
-from ray.tune.schedulers import PopulationBasedTraining
-from sklearn.model_selection import train_test_split
 from transformers import (
-    AutoModelForSequenceClassification,
     AutoModelForTokenClassification,
     AutoTokenizer,
     DataCollatorForTokenClassification,
@@ -22,6 +17,7 @@ from transformers import (
 )
 
 CONFIG_PATH = ""
+LABEL_LIST = ["O", "B-OBJ", "I-OBJ", "B-ASP", "I-ASP", "B-PRED", "I-PRED"]
 
 
 def load_config(config_name):
@@ -33,10 +29,15 @@ def load_config(config_name):
 
 config = load_config("configuration.yaml")
 
+eval_inputs = None
+tokenizer = None
+tokenized_datasets = None
+
 
 def tokenize_and_align_labels(examples, label_all_tokens=False, **kwargs):
+    # deberta first word starts with ▁
+    # next word with ' ' nothing
     tokenizer = kwargs["tokenizer"]
-    label_list = kwargs["label_list"]
 
     tokenized_inputs = tokenizer(
         examples["words"], truncation=True, is_split_into_words=True
@@ -56,7 +57,7 @@ def tokenize_and_align_labels(examples, label_all_tokens=False, **kwargs):
                 label_ids.append(label[word_idx] if label_all_tokens else -100)
             previous_word_idx = word_idx
         label_ids = [
-            label_list.index(idx) if isinstance(idx, str) else idx for idx in label_ids
+            LABEL_LIST.index(idx) if isinstance(idx, str) else idx for idx in label_ids
         ]
 
         labels.append(label_ids)
@@ -79,11 +80,9 @@ def compute_metrics(eval_preds):
         true_predictions.append([])
         true_labels.append([])
         for p, l, t in zip(prediction, label, tokens):
-            if l != -100 and not tokenizer.convert_ids_to_tokens(int(t)).startswith(
-                "##"
-            ):
-                true_predictions[-1].append(label_list[p])
-                true_labels[-1].append(label_list[l])
+            if l != -100 and tokenizer.convert_ids_to_tokens(int(t)).startswith("__"):
+                true_predictions[-1].append(LABEL_LIST[p])
+                true_labels[-1].append(LABEL_LIST[l])
 
     metric = evaluate.load("seqeval", scheme="IOB2")
     results = metric.compute(predictions=true_predictions, references=true_labels)
@@ -111,10 +110,10 @@ def raytune_hp_space(trial):
 def model_init():
     model = AutoModelForTokenClassification.from_pretrained(
         config["model"]["name"],
-        num_labels=len(label_list),
+        num_labels=len(LABEL_LIST),
         ignore_mismatched_sizes=True,
     ).to(config["device"])
-    model.config.id2label = dict(enumerate(label_list))
+    model.config.id2label = dict(enumerate(LABEL_LIST))
     model.config.label2id = {v: k for k, v in model.config.id2label.items()}
     return model
 
@@ -155,7 +154,7 @@ def read_data(filename):
     return df
 
 
-def main():
+def train_main():
     torch.manual_seed(config["seed"])
     random.seed(config["seed"])
     np.random.seed(config["seed"])
@@ -179,9 +178,6 @@ def main():
         }
     )
 
-    global label_list
-    label_list = ["O", "B-OBJ", "I-OBJ", "B-ASP", "I-ASP", "B-PRED", "I-PRED"]
-
     """# Training
     """
 
@@ -196,7 +192,7 @@ def main():
     tokenized_datasets = ner_data.map(
         tokenize_and_align_labels,
         batched=True,
-        fn_kwargs={"tokenizer": tokenizer, "label_list": label_list},
+        fn_kwargs={"tokenizer": tokenizer},
     )
 
     data_collator = DataCollatorForTokenClassification(tokenizer)
@@ -292,8 +288,8 @@ def main():
     results_file.close()
 
     print("Save the model")
-    model.save_pretrained(f"./{config['log']['run_name']}-best/")
-    tokenizer.save_pretrained(f"./{config['log']['run_name']}-best/")
+    trainer.save_model(f"./{config['log']['run_name']}-best/")
 
 
-main()
+if __name__ == "__main__":
+    train_main()
