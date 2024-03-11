@@ -1,24 +1,29 @@
+import os
+
+import torch
 from fastapi import FastAPI
 from pydantic import BaseModel
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
-import torch
-import os
+from transformers import AutoModelForSequenceClassification, AutoTokenizer
+
 # ====================== API ==========================
 app = FastAPI()  # Create the API on Port 8000
 
-if not os.path.exists('model'):
-    os.makedirs('model')
+if not os.path.exists("model"):
+    os.makedirs("model")
 
-if not os.listdir('model'):
+if not os.listdir("model"):
     print("Downloading model...")
-    model = AutoModelForSequenceClassification.from_pretrained("uhhlt/stance-comp-classifier", num_labels=3)  # .to("cuda")
-    tokenizer = AutoTokenizer.from_pretrained('uhhlt/stance-comp-classifier')
-    model.save_pretrained('model')
-    tokenizer.save_pretrained('model')
+    model = AutoModelForSequenceClassification.from_pretrained(
+        "uhhlt/stance-comp-classifier", num_labels=3
+    )  # .to("cuda")
+    tokenizer = AutoTokenizer.from_pretrained("uhhlt/stance-comp-classifier")
+    model.save_pretrained("model")
+    tokenizer.save_pretrained("model")
 else:
     print("Loading model...")
     model = AutoModelForSequenceClassification.from_pretrained("model", num_labels=3)
-    tokenizer = AutoTokenizer.from_pretrained('model')
+    tokenizer = AutoTokenizer.from_pretrained("model")
+
 
 class argument(BaseModel):
     value: str
@@ -38,8 +43,10 @@ class response(BaseModel):
 
 @app.get("/")
 async def root():
-    return "Welcome to Comparative Sentence Identification Machine!" \
-           "\nUse /is_comparative/{sentence} to check your Sentence."
+    return (
+        "Welcome to Comparative Sentence Identification Machine!"
+        "\nUse /is_comparative/{sentence} to check your Sentence."
+    )
 
 
 @app.get("/is_comparative/{sentence}")
@@ -50,7 +57,15 @@ async def is_comparative(sentence: str):
 @app.post("/get_arguments")
 async def get_arguments(item: request):
     # concatenate object1, object2 with every argument in item
-    print('Received request with: ' + str(len(item.arguments)) + ' arguments for ' + item.object1 + ' and ' + item.object2 + '.')
+    print(
+        "Received request with: "
+        + str(len(item.arguments))
+        + " arguments for "
+        + item.object1
+        + " and "
+        + item.object2
+        + "."
+    )
     conc_arguments = []
     shadow_arguments = []
     arguments1 = []
@@ -85,7 +100,6 @@ async def get_arguments(item: request):
 
     # use analyse_sentence to get the arguments
     for i in range(len(conc_arguments)):
-
         cl = analyse_sentence(conc_arguments[i][1].value)
 
         if cl == 2 and conc_arguments[i][0] is False:
@@ -96,8 +110,9 @@ async def get_arguments(item: request):
             arguments2.append(shadow_arguments[i])
         elif cl == 1 and conc_arguments[i][0] is True:
             arguments1.append(shadow_arguments[i])
-    print('args1: ' + str(arguments1) + ' args2: ' + str(arguments2))
+    print("args1: " + str(arguments1) + " args2: " + str(arguments2))
     return response(arguments1=arguments1, arguments2=arguments2)
+
 
 # ====================== ML ==========================
 

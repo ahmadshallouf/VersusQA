@@ -5,7 +5,7 @@
 
 **Due to size problems, the model can't be found in this repository but it can be easily recreated, as explained below**
 
-The Comparative Question Identification Model is a transformer-based classification model created for the identification of comparative questions. 
+The Comparative Question Identification Model is a transformer-based classification model created for the identification of comparative questions.
 
 ## Dataset
 
@@ -61,4 +61,3 @@ If you wish to test a new pre-trained model you may do so by modifying the file 
 ```python
 python hyperparameter_training.py
 ```
-

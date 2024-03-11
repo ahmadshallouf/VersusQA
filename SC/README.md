@@ -13,7 +13,7 @@ The original dataset from [Panchenko et al., 2019](https://aclanthology.org/W19-
 Install all the needed libraries from `requirements.txt`:
 
 ```python
-pip install -r requirements.txt 
+pip install -r requirements.txt
 ```
 
 If you don't want to report to [WandB](https://wandb.ai/) please comment the respective lines in `train_main.py`.

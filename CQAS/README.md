@@ -2,7 +2,7 @@
 
 [![UHH](https://www.kus.uni-hamburg.de/5572339/uhh-logo-2010-29667bd15f143feeb1ebd96b06334fddfe378e09.png)](https://www.uni-hamburg.de/) -  <a href="https://www.inf.uni-hamburg.de/en/inst/ab/sems/home.html"><img src="https://www.inf.uni-hamburg.de/5546980/lt-logo-640x361-9345df620ffab7a8ce97149b66c2dfc9d3ff429e.png" width="200" height="100" /></a>
 
-The Comparative Question Answering Summarization is an abstractive text summarization model used for summarizing CQAM (Comparative Question Answering Machine) outputs. 
+The Comparative Question Answering Summarization is an abstractive text summarization model used for summarizing CQAM (Comparative Question Answering Machine) outputs.
 
 ### Dataset
 
@@ -48,4 +48,3 @@ You can try generating summaries via demo:
 ```python
 python demo.py
 ```
-

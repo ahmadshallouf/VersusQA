@@ -12,7 +12,7 @@ It uses the [Webis Comparative Questions 2022](https://zenodo.org/records/721339
 Install all the needed libraries from `requirements.txt`:
 
 ```python
-pip install -r requirements.txt 
+pip install -r requirements.txt
 ```
 
 If you don't want to report to [WandB](https://wandb.ai/) please comment the respective lines in `train_main.py`.

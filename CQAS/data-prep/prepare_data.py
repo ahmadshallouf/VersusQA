@@ -1,12 +1,13 @@
-import json
-from datasets import load_dataset
-import pandas as pd
 import codecs
+import json
 import re
+
+import pandas as pd
+from datasets import load_dataset
 
 
 def prepare_data_unprocessed():
-    with open('chatgpt_dataset_few_shot_final.jsonlines', 'r') as json_file:
+    with open("chatgpt_dataset_few_shot_final.jsonlines") as json_file:
         str_json = json_file.read()
     json_data = json.loads(str_json)
 
@@ -16,17 +17,14 @@ def prepare_data_unprocessed():
         outputs = example["outputs"]
 
         for output in outputs:
-            json_list.append({
-                "input": input,
-                "output": output
-            })
+            json_list.append({"input": input, "output": output})
 
     total_samples = len(json_list)
     train_size = int(total_samples * 0.8)
     test_size = int(total_samples * 0.1)
     train_set = json_list[:train_size]
-    test_set = json_list[train_size: train_size + test_size]
-    val_set = json_list[train_size + test_size:]
+    test_set = json_list[train_size : train_size + test_size]
+    val_set = json_list[train_size + test_size :]
 
     with open("train.jsonlines", "w") as outfile:
         outfile.write(json.dumps(train_set))
@@ -39,7 +37,7 @@ def prepare_data_unprocessed():
 
 
 def prepare_data_huggingface(json_path, output_path):
-    with open(json_path, 'r') as file:
+    with open(json_path) as file:
         str = file.read()
         data = json.loads(str)
 
@@ -50,9 +48,11 @@ def prepare_data_huggingface(json_path, output_path):
 
         # Process input
         input = input.split("Summarize only relevant arguments from the list.\n\n")[1]
-        input = input.split("\n\nAfter the summary, list the arguments you used below the text.")[0]
+        input = input.split(
+            "\n\nAfter the summary, list the arguments you used below the text."
+        )[0]
         input = input.split("\n")
-        if input == ['']:
+        if input == [""]:
             continue
         arguments = []
         for argument in input:
@@ -62,19 +62,16 @@ def prepare_data_huggingface(json_path, output_path):
 
         # Process output
         output = output.split("\n\nArguments used:")[0]
-        output = re.sub(r'[\d]+', '', output)
+        output = re.sub(r"[\d]+", "", output)
         output = output.replace(" []", "")
         output = output.replace("[]", "")
 
         # Add to list
-        lst.append({
-            "input": "Summarize: " + input,
-            "output": output
-        })
+        lst.append({"input": "Summarize: " + input, "output": output})
 
     with open(output_path, "w") as outfile:
         for pair in lst:
-            outfile.write(json.dumps(pair)+"\n")
+            outfile.write(json.dumps(pair) + "\n")
 
 
 # prepare_data_unprocessed()

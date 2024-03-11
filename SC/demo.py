@@ -1,9 +1,11 @@
 import gradio as gr
 import torch
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
+from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
-model = AutoModelForSequenceClassification.from_pretrained("uhhlt/stance-comp-classifier", num_labels=3)  # .to("cuda")
-tokenizer = AutoTokenizer.from_pretrained('uhhlt/stance-comp-classifier')
+model = AutoModelForSequenceClassification.from_pretrained(
+    "uhhlt/stance-comp-classifier", num_labels=3
+)  # .to("cuda")
+tokenizer = AutoTokenizer.from_pretrained("uhhlt/stance-comp-classifier")
 
 
 def test(sentence):
@@ -14,10 +16,10 @@ def test(sentence):
         predicted_class_id = logits.argmax().item()
 
     if predicted_class_id == 0:
-        return f'Object one is better than Object two: {logits}'
+        return f"Object one is better than Object two: {logits}"
     elif predicted_class_id == 1:
-        return f'The sentence is not comparative: {logits}'
-    return f'Object two is better than Object one: {logits}'
+        return f"The sentence is not comparative: {logits}"
+    return f"Object two is better than Object one: {logits}"
 
 
 demo = gr.Interface(fn=test, inputs="text", outputs="text")
