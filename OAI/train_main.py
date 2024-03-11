@@ -154,6 +154,40 @@ def read_data(filename):
     return df
 
 
+def evaluate_dataset(trainer, dataset_part_name):
+    global tokenized_datasets
+    global eval_inputs
+    global tokenizer
+
+    eval_inputs = tokenized_datasets[dataset_part_name]["input_ids"]
+    results = trainer.predict(
+        test_dataset=tokenized_datasets[dataset_part_name],
+        metric_key_prefix=dataset_part_name,
+    )
+    inputs = eval_inputs
+
+    predictions = np.argmax(results.predictions, axis=2)
+
+    true_predictions = []
+    true_labels = []
+    for prediction, label, tokens in zip(predictions, results.label_ids, inputs):
+        true_predictions.append([])
+        true_labels.append([])
+        for p, l, t in zip(prediction, label, tokens):
+            if l != -100 and tokenizer.convert_ids_to_tokens(int(t)).startswith("▁"):
+                true_predictions[-1].append(LABEL_LIST[p])
+                true_labels[-1].append(LABEL_LIST[l])
+
+    df = pd.DataFrame(
+        {
+            "words": tokenizer.batch_decode(inputs),
+            "labels": true_labels,
+            "predictions": true_predictions,
+        }
+    )
+    df.to_csv(f"{config['log']['run_name']}-{dataset_part_name}.csv", index=False)
+
+
 def train_main():
     torch.manual_seed(config["seed"])
     random.seed(config["seed"])
