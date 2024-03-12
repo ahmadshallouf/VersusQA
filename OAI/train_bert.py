@@ -91,14 +91,16 @@ def train_bert():
         first_step=config["log"]["first_step"],
         level=config["log"]["level"],
     )
-    # args.set_lr_scheduler(name=config["lr_name"],
-    #                       warmup_steps=config["lr_warmup_steps"])
+    args.set_lr_scheduler(
+        name=config["learning_rate_scheduler"]["name"],
+        warmup_steps=config["learning_rate_scheduler"]["warmup_steps"],
+    )
 
     args.set_optimizer(
-        name=config["optimizer_name"],
-        learning_rate=config["optimizer_learning_rate"],
+        name=config["optimizer"]["name"],
+        learning_rate=config["optimizer"]["learning_rate"],
+        weight_decay=config["optimizer"]["weight_decay"],
     )
-    #                  weight_decay=config["lr_weight_decay"])
     # args.set_save(strategy=config["save"]["strategy"], steps=config["save"]["steps"])
     args.set_testing(batch_size=config["test"]["batch_size"])
     args.set_training(
