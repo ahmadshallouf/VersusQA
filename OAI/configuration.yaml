@@ -1,5 +1,5 @@
 seed: 42
-device: cuda:0
+gpu: 0
 
 data:
   folder_path: ./data/
