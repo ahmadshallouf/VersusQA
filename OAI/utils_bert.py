@@ -1,3 +1,4 @@
+import copy
 import os
 
 import evaluate
@@ -6,7 +7,7 @@ import pandas as pd
 import yaml
 from transformers import AutoModelForTokenClassification
 
-CONFIG_PATH = ""
+CONFIG_PATH = "/home/user/VersusQA/OAI/"
 LABEL_LIST = ["O", "B-OBJ", "I-OBJ", "B-ASP", "I-ASP", "B-PRED", "I-PRED"]
 
 
@@ -88,8 +89,6 @@ def tokenize_and_align_labels(examples, label_all_tokens=False, **kwargs):
 def model_init_helper(config=load_config("configuration.yaml")):
     def model_init():
         nonlocal config
-        print(config)
-        print("djhsdglh js")
         model = AutoModelForTokenClassification.from_pretrained(
             config["model"]["name"],
             num_labels=len(LABEL_LIST),
@@ -136,6 +135,12 @@ def compute_metrics_helper(tokenizer):
         return results_unfolded
 
     return compute_metrics
+
+
+def compute_objective(metrics):
+    metrics = copy.deepcopy(metrics)
+    loss = metrics.pop("eval_loss", None)
+    return metrics["overall_f1"] if metrics.pop("overall_f1", None) else loss
 
 
 def evaluate_dataset(

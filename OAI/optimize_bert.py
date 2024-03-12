@@ -12,6 +12,7 @@ from transformers import (
 )
 from utils_bert import (
     compute_metrics_helper,
+    compute_objective,
     load_config,
     model_init_helper,
     read_data,
@@ -26,8 +27,8 @@ def raytune_hp_space(trial):
         "learning_rate": tune.loguniform(1e-6, 1e-4),
         "per_device_train_batch_size": tune.choice([8, 16]),
         "num_train_epochs": tune.choice([3, 4, 5, 6]),
-        # "weight_decay": tune.loguniform(1e-3, 1e-1),
-        # "warmup_steps": tune.uniform(0, 500),
+        "weight_decay": tune.loguniform(1e-3, 1e-1),
+        "warmup_steps": tune.uniform(0, 500),
         # "seed": tune.uniform(2, 42),
     }
 
@@ -104,14 +105,16 @@ def optimize_bert():
         first_step=config["log"]["first_step"],
         level=config["log"]["level"],
     )
-    # args.set_lr_scheduler(name=config["lr_name"],
-    #                       warmup_steps=config["lr_warmup_steps"])
+    args.set_lr_scheduler(
+        name=config["learning_rate_scheduler"]["name"],
+        # warmup_steps=config["learning_rate_scheduler"]["warmup_steps"],
+    )
 
     args.set_optimizer(
-        name=config["optimizer_name"],
-        learning_rate=config["optimizer_learning_rate"],
+        name=config["optimizer"]["name"],
+        # learning_rate=config["optimizer"]["learning_rate"],
+        # weight_decay=config["optimizer"]["weight_decay"],
     )
-    #                  weight_decay=config["lr_weight_decay"])
     # args.set_save(strategy=config["save"]["strategy"], steps=config["save"]["steps"])
     args.set_testing(batch_size=config["test"]["batch_size"])
     args.set_training(
@@ -134,12 +137,14 @@ def optimize_bert():
         direction="maximize",
         backend="ray",
         hp_space=raytune_hp_space,
+        compute_objective=compute_objective,
         n_trials=10,
         scheduler=PopulationBasedTraining(
             metric="objective",
             mode="max",
             hyperparam_mutations=raytune_hp_space("trial"),
         ),
+        log_to_file=True,
     )
 
     print("Best trial:", best_trial)
