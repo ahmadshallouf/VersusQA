@@ -1,9 +1,8 @@
 import os
 
-import ray.tune as tune
 import transformers
 from datasets import Dataset, DatasetDict
-from ray.tune.schedulers import PopulationBasedTraining
+from ray import tune
 from transformers import (
     AutoTokenizer,
     DataCollatorForTokenClassification,
@@ -24,12 +23,11 @@ config = load_config("configuration.yaml")
 
 def raytune_hp_space(trial):
     return {
-        "learning_rate": tune.loguniform(1e-6, 1e-4),
-        "per_device_train_batch_size": tune.choice([8, 16]),
-        "num_train_epochs": tune.choice([3, 4, 5, 6]),
-        "weight_decay": tune.loguniform(1e-3, 1e-1),
-        "warmup_steps": tune.uniform(0, 500),
-        # "seed": tune.uniform(2, 42),
+        "learning_rate": tune.choice([1e-5, 3e-5, 5e-5, 7e-5, 1e-4]),
+        "per_device_train_batch_size": tune.choice([8, 16, 32]),
+        "num_train_epochs": tune.choice([5, 10, 20]),
+        "weight_decay": tune.choice([1e-4, 1e-3, 1e-2, 1e-1]),
+        "warmup_steps": tune.choice([100, 200, 300, 400]),
     }
 
 
@@ -37,7 +35,7 @@ def optimize_bert():
     # os.environ["CUDA_VISIBLE_DEVICES"] = str(config["gpu"])
     transformers.set_seed(config["seed"])
 
-    os.environ["WANDB_PROJECT"] = "draft-" + config["log"]["run_name"]
+    os.environ["WANDB_PROJECT"] = "optimize-" + config["log"]["run_name"]
     os.environ["WANDB_LOG_MODEL"] = "end"
     os.environ["WANDB_WATCH"] = "all"
     os.environ["WANDB_SILENT"] = "false"
@@ -139,11 +137,11 @@ def optimize_bert():
         hp_space=raytune_hp_space,
         compute_objective=compute_objective,
         n_trials=10,
-        scheduler=PopulationBasedTraining(
-            metric="objective",
-            mode="max",
-            hyperparam_mutations=raytune_hp_space("trial"),
-        ),
+        # scheduler=PopulationBasedTraining(
+        #     metric="objective",
+        #     mode="max",
+        #     # hyperparam_mutations=raytune_hp_space(""),
+        # ),
         log_to_file=True,
     )
 
