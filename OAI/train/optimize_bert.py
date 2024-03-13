@@ -89,7 +89,7 @@ def optimize_bert():
     )
     args.set_dataloader(
         sampler_seed=config["seed"],
-        train_batch_size=config["train"]["batch_size"],
+        # train_batch_size=config["train"]["batch_size"],
         eval_batch_size=config["eval"]["batch_size"],
     )  # auto_find_batch_size=True
     args.set_evaluate(
@@ -117,10 +117,10 @@ def optimize_bert():
     )
     # args.set_save(strategy=config["save"]["strategy"], steps=config["save"]["steps"])
     args.set_testing(batch_size=config["test"]["batch_size"])
-    args.set_training(
-        num_epochs=config["train"]["num_epochs"],
-        batch_size=config["train"]["batch_size"],
-    )
+    # args.set_training(
+    #     # num_epochs=config["train"]["num_epochs"],
+    #     # batch_size=config["train"]["batch_size"],
+    # )
 
     trainer = Trainer(
         model_init=model_init_helper(),
@@ -138,31 +138,13 @@ def optimize_bert():
         backend="ray",
         hp_space=raytune_hp_space,
         compute_objective=compute_objective,
-        n_trials=20,
+        n_trials=1,
         search_alg=HyperOptSearch(metric="objective", mode="max"),
         scheduler=ASHAScheduler(metric="objective", mode="max"),
         log_to_file=True,
     )
 
     print("Best trial:", best_trial)
-
-    print("Inference")
-    results_file = open(f"{config['log']['run_name']}-final.txt", "w")
-    results_file.write("Training\n")
-    results = trainer.evaluate(eval_dataset=tokenized_datasets["train"])
-    results_file.writelines([f"{results}", "\n"])
-
-    results_file.write("Validating\n")
-    results = trainer.evaluate(eval_dataset=tokenized_datasets["valid"])
-    results_file.writelines([f"{results}", "\n"])
-
-    results_file.write("Testing\n")
-    results = trainer.evaluate(eval_dataset=tokenized_datasets["test"])
-    results_file.writelines([f"{results}", "\n"])
-    results_file.close()
-
-    print("Save the model")
-    trainer.save_model(f"./{config['log']['run_name']}-best/")
 
 
 if __name__ == "__main__":
