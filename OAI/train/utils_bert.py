@@ -8,7 +8,7 @@ import yaml
 from transformers import AutoModelForTokenClassification
 
 CONFIG_PATH = "/home/user/VersusQA/OAI/train/"
-LABEL_LIST = ["O", "OBJ", "ASP", "PRED"]
+LABEL_LIST = ["O", "B-OBJ", "I-OBJ", "B-ASP", "I-ASP", "B-PRED", "I-PRED"]
 
 
 def load_config(config_name):
@@ -18,17 +18,43 @@ def load_config(config_name):
     return config
 
 
+def transform_to_iob2_format(labels):
+    new_labels = []
+    prev_label = labels[0]
+    is_first_label = True
+    for ind in range(1, len(labels)):
+        label = labels[ind]
+        if prev_label != label:
+            new_label = "B-" + prev_label if is_first_label else "I-" + prev_label
+            new_labels.append(prev_label if prev_label == "O" else new_label)
+            prev_label = label
+            is_first_label = True
+        elif is_first_label:
+            new_labels.append(prev_label if prev_label == "O" else "B-" + prev_label)
+            prev_label = label
+            is_first_label = False
+        else:
+            new_labels.append(prev_label if prev_label == "O" else "I-" + prev_label)
+            prev_label = label
+
+    new_label = "B-" + prev_label if is_first_label else "I-" + prev_label
+    new_labels.append(prev_label if prev_label == "O" else new_label)
+
+    return new_labels
+
+
 def read_data(filename, config=load_config("config.yaml")):
     df = (
         pd.read_csv(config["data"]["folder_path"] + filename, sep=",")
         .groupby("sentence_id")
         .agg({"words": lambda x: list(x), "labels": lambda x: list(x)})
     )
+
+    df = df.reset_index(drop=True)
+    df["labels"] = df["labels"].map(lambda x: transform_to_iob2_format(x))
     df["labels"] = df["labels"].apply(
         lambda labels: [LABEL_LIST.index(label) for label in labels]
     )
-    df = df.reset_index(drop=True)
-    # df["labels"] = df["labels"].map(lambda x: transform_to_iob2_format(x))
     return df
 
 
@@ -51,10 +77,13 @@ def tokenize_and_align_labels(examples, one_label_per_word=True, **kwargs):
                 current_word = word_id
                 new_labels.append(label[word_id])
             else:
-                new_labels.append(-100 if one_label_per_word else label[word_id])
+                lab = label[word_id]
+                if lab % 2 == 1:
+                    lab += 1
+                new_labels.append(-100 if one_label_per_word else lab)
         labels.append(new_labels)
 
-    tokenized_inputs["labels"] = labels
+    tokenized_inputs["new_labels"] = labels
     return tokenized_inputs
 
 
@@ -131,28 +160,3 @@ def evaluate_dataset(
         }
     )
     df.to_csv(f"{config['log']['run_name']}-{metric_prefix}.csv", index=False)
-
-
-def transform_to_iob2_format(labels):
-    new_labels = []
-    prev_label = labels[0]
-    is_first_label = True
-    for ind in range(1, len(labels)):
-        label = labels[ind]
-        if prev_label != label:
-            new_label = "B-" + prev_label if is_first_label else "I-" + prev_label
-            new_labels.append(prev_label if prev_label == "O" else new_label)
-            prev_label = label
-            is_first_label = True
-        elif is_first_label:
-            new_labels.append(prev_label if prev_label == "O" else "B-" + prev_label)
-            prev_label = label
-            is_first_label = False
-        else:
-            new_labels.append(prev_label if prev_label == "O" else "I-" + prev_label)
-            prev_label = label
-
-    new_label = "B-" + prev_label if is_first_label else "I-" + prev_label
-    new_labels.append(prev_label if prev_label == "O" else new_label)
-
-    return new_labels

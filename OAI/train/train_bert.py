@@ -9,7 +9,7 @@ from transformers import (
     TrainingArguments,
 )
 from utils_bert import (
-    compute_metrics_helper,
+    compute_metrics,
     load_config,
     model_init_helper,
     read_data,
@@ -115,7 +115,7 @@ def train_bert():
         eval_dataset=tokenized_datasets["valid"],
         tokenizer=tokenizer,
         data_collator=data_collator,
-        compute_metrics=compute_metrics_helper(tokenizer),
+        compute_metrics=compute_metrics,
     )
 
     print("Training")
