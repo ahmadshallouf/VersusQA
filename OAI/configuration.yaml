@@ -37,7 +37,7 @@ learning_rate_scheduler:
 eval:
   strategy: "steps"
   steps: 100
-  batch_size: 16
+  batch_size: 8
   delay: 0.0
 
 save:
@@ -46,4 +46,4 @@ save:
 
 test:
   pipeline_aggregation_strategy: "simple"
-  batch_size: 16
+  batch_size: 8

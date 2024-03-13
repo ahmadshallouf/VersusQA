@@ -3,6 +3,8 @@ import os
 import transformers
 from datasets import Dataset, DatasetDict
 from ray import tune
+from ray.tune.schedulers import ASHAScheduler
+from ray.tune.search.hyperopt import HyperOptSearch
 from transformers import (
     AutoTokenizer,
     DataCollatorForTokenClassification,
@@ -24,8 +26,8 @@ config = load_config("configuration.yaml")
 def raytune_hp_space(trial):
     return {
         "learning_rate": tune.choice([1e-5, 3e-5, 5e-5, 7e-5, 1e-4]),
-        "per_device_train_batch_size": tune.choice([8, 16, 32]),
-        "num_train_epochs": tune.choice([5, 10, 20]),
+        "per_device_train_batch_size": tune.choice([8, 16]),
+        "num_train_epochs": tune.randint([3, 20]),
         "weight_decay": tune.choice([1e-4, 1e-3, 1e-2, 1e-1]),
         "warmup_steps": tune.choice([100, 200, 300, 400]),
     }
@@ -136,12 +138,9 @@ def optimize_bert():
         backend="ray",
         hp_space=raytune_hp_space,
         compute_objective=compute_objective,
-        n_trials=10,
-        # scheduler=PopulationBasedTraining(
-        #     metric="objective",
-        #     mode="max",
-        #     # hyperparam_mutations=raytune_hp_space(""),
-        # ),
+        n_trials=20,
+        search_alg=HyperOptSearch(metric="objective", mode="max"),
+        scheduler=ASHAScheduler(metric="objective", mode="max"),
         log_to_file=True,
     )
 
