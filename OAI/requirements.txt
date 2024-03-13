@@ -2,3 +2,4 @@ gradio==4.21.0
 pyyaml==6.0.1
 fastapi==0.110.0
 transformers==4.38.2
+torch==2.2.1
