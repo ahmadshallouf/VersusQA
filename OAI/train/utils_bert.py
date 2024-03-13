@@ -7,7 +7,7 @@ import pandas as pd
 import yaml
 from transformers import AutoModelForTokenClassification
 
-CONFIG_PATH = "/home/user/VersusQA/OAI/"
+CONFIG_PATH = "/home/user/VersusQA/OAI/train/"
 LABEL_LIST = ["O", "B-OBJ", "I-OBJ", "B-ASP", "I-ASP", "B-PRED", "I-PRED"]
 
 
@@ -43,7 +43,7 @@ def transform_to_iob2_format(labels):
     return new_labels
 
 
-def read_data(filename, config=load_config("configuration.yaml")):
+def read_data(filename, config=load_config("config.yaml")):
     df = (
         pd.read_csv(config["data"]["folder_path"] + filename, sep=",")
         .groupby("sentence_id")
@@ -86,7 +86,7 @@ def tokenize_and_align_labels(examples, label_all_tokens=False, **kwargs):
     return tokenized_inputs
 
 
-def model_init_helper(config=load_config("configuration.yaml")):
+def model_init_helper(config=load_config("config.yaml")):
     def model_init():
         nonlocal config
         model = AutoModelForTokenClassification.from_pretrained(
@@ -144,7 +144,7 @@ def compute_objective(metrics):
 
 
 def evaluate_dataset(
-    trainer, tokenized_dataset, metric_prefix, config=load_config("configuration.yaml")
+    trainer, tokenized_dataset, metric_prefix, config=load_config("config.yaml")
 ):
     results = trainer.predict(
         test_dataset=tokenized_dataset,

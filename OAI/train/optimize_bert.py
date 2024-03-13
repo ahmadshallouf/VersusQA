@@ -2,6 +2,9 @@ import os
 
 import transformers
 from datasets import Dataset, DatasetDict
+from ray import tune
+from ray.tune.schedulers import ASHAScheduler
+from ray.tune.search.hyperopt import HyperOptSearch
 from transformers import (
     AutoTokenizer,
     DataCollatorForTokenClassification,
@@ -10,20 +13,31 @@ from transformers import (
 )
 from utils_bert import (
     compute_metrics_helper,
+    compute_objective,
     load_config,
     model_init_helper,
     read_data,
     tokenize_and_align_labels,
 )
 
-config = load_config("configuration.yaml")
+config = load_config("config.yaml")
 
 
-def train_bert():
+def raytune_hp_space(trial):
+    return {
+        "learning_rate": tune.choice([1e-5, 3e-5, 5e-5, 7e-5, 1e-4]),
+        "per_device_train_batch_size": tune.choice([8, 16]),
+        "num_train_epochs": tune.randint(3, 20),
+        "weight_decay": tune.choice([1e-4, 1e-3, 1e-2, 1e-1]),
+        "warmup_steps": tune.choice([100, 200, 300, 400]),
+    }
+
+
+def optimize_bert():
     # os.environ["CUDA_VISIBLE_DEVICES"] = str(config["gpu"])
     transformers.set_seed(config["seed"])
 
-    os.environ["WANDB_PROJECT"] = "reproduce-" + config["log"]["run_name"]
+    os.environ["WANDB_PROJECT"] = "optimize-" + config["log"]["run_name"]
     os.environ["WANDB_LOG_MODEL"] = "end"
     os.environ["WANDB_WATCH"] = "all"
     os.environ["WANDB_SILENT"] = "false"
@@ -93,13 +107,13 @@ def train_bert():
     )
     args.set_lr_scheduler(
         name=config["learning_rate_scheduler"]["name"],
-        warmup_steps=config["learning_rate_scheduler"]["warmup_steps"],
+        # warmup_steps=config["learning_rate_scheduler"]["warmup_steps"],
     )
 
     args.set_optimizer(
         name=config["optimizer"]["name"],
-        learning_rate=config["optimizer"]["learning_rate"],
-        weight_decay=config["optimizer"]["weight_decay"],
+        # learning_rate=config["optimizer"]["learning_rate"],
+        # weight_decay=config["optimizer"]["weight_decay"],
     )
     # args.set_save(strategy=config["save"]["strategy"], steps=config["save"]["steps"])
     args.set_testing(batch_size=config["test"]["batch_size"])
@@ -109,7 +123,7 @@ def train_bert():
     )
 
     trainer = Trainer(
-        model=model_init_helper()(),
+        model_init=model_init_helper(),
         args=args,
         train_dataset=tokenized_datasets["train"],
         eval_dataset=tokenized_datasets["valid"],
@@ -118,8 +132,19 @@ def train_bert():
         compute_metrics=compute_metrics_helper(tokenizer),
     )
 
-    print("Training")
-    trainer.train()
+    print("Hyperparameter Search")
+    best_trial = trainer.hyperparameter_search(
+        direction="maximize",
+        backend="ray",
+        hp_space=raytune_hp_space,
+        compute_objective=compute_objective,
+        n_trials=20,
+        search_alg=HyperOptSearch(metric="objective", mode="max"),
+        scheduler=ASHAScheduler(metric="objective", mode="max"),
+        log_to_file=True,
+    )
+
+    print("Best trial:", best_trial)
 
     print("Inference")
     results_file = open(f"{config['log']['run_name']}-final.txt", "w")
@@ -141,4 +166,4 @@ def train_bert():
 
 
 if __name__ == "__main__":
-    train_bert()
+    optimize_bert()

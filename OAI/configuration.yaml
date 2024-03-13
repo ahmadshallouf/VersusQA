@@ -1,49 +1,6 @@
-seed: 0
-gpu: 0
-
 data:
-  folder_path: ./data/
   last_model_path: uhhlt/comp-seqlab-deberta
   fast_model_path: uhhlt/comp-seqlab-dslim-bert
 
-model:
-  name: "microsoft/deberta-v3-base"
-  load_best_at_end: True
-  metric_for_best: "eval_overall_f1"
-  model_max_length: 64
-
-log:
-  strategy: "steps"
-  steps: 100
-  report_to: ["wandb"]
-  first_step: True
-  run_name: "microsoft-deberta-v3-base"
-  level: "info"
-
-train:
-  overwrite_checkpoint_path: True
-  num_epochs: 3
-  batch_size: 9
-
-optimizer:
-  name: "adamw_torch"
-  learning_rate: 3e-4
-  weight_decay: 0.01
-
-learning_rate_scheduler:
-  name: "cosine"
-  warmup_steps: 48
-
-eval:
-  strategy: "steps"
-  steps: 100
-  batch_size: 8
-  delay: 0.0
-
-save:
-  strategy: "steps"
-  steps: 100
-
 test:
   pipeline_aggregation_strategy: "simple"
-  batch_size: 8
