@@ -43,7 +43,7 @@ test_df = test_df[["x", "y"]]
 
 # save the new dataset to a csv file with same name as the original file but in folder data
 # original file name is in variable file
-train, val = train_test_split(train_df, test_size=0.1)
+train, val = train_test_split(train_df, test_size=0.1, random_state=0)
 train.to_csv("./data/train2.csv", index=False, sep="\t")
 val.to_csv("./data/val2.csv", index=False, sep="\t")
 test_df.to_csv("./data/test2.csv", index=False, sep="\t")

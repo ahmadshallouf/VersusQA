@@ -22,11 +22,14 @@ train:
   num_epochs: 4
   batch_size: 12
 
-#lr_name: "cosine"
-#lr_warmup_steps: 300
-#lr_weight_decay: 0.001
-optimizer_name: "adamw_torch"
-optimizer_learning_rate: 6.05E-05
+optimizer:
+  name: "adamw_torch"
+  learning_rate: 6.05E-05
+  weight_decay: 0.01
+
+learning_rate_scheduler:
+  name: "cosine"
+  warmup_steps: 100
 
 eval:
   strategy: "steps"
@@ -37,3 +40,6 @@ eval:
 save:
   strategy: "steps"
   steps: 100
+
+test:
+  batch_size: 16

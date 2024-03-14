@@ -23,16 +23,10 @@ PRECISION_METRIC = evaluate.load("precision")
 ACCURACY_METRIC = evaluate.load("accuracy")
 
 
-def load_config(config_name):
-    with open(os.path.join(CONFIG_PATH, config_name)) as file:
-        config = yaml.safe_load(file)
-
-    return config
-
-
 config = load_config("config.yaml")
 
 
+# TODO: rename
 def hp_space(trial):
     return {
         "learning_rate": tune.loguniform(1e-6, 1e-4),
@@ -41,41 +35,6 @@ def hp_space(trial):
         # "warmup_steps": tune.uniform(0, 500),
         # "seed": tune.uniform(2, 42)
     }
-
-
-def tokenize_function(examples):
-    return tokenizer(examples["text"])
-
-
-def compute_metrics(eval_pred):
-    predictions, labels = eval_pred
-    predictions = np.argmax(predictions, axis=-1)
-
-    results = {}
-    results.update(
-        F1_METRIC.compute(
-            predictions=predictions, references=labels, average="weighted"
-        )
-    )
-    results.update(
-        RECALL_METRIC.compute(
-            predictions=predictions, references=labels, average="weighted"
-        )
-    )
-    results.update(
-        PRECISION_METRIC.compute(
-            predictions=predictions, references=labels, average="weighted"
-        )
-    )
-    results.update(ACCURACY_METRIC.compute(predictions=predictions, references=labels))
-
-    return results
-
-
-def model_init():
-    return AutoModelForSequenceClassification.from_pretrained(
-        config["model"]["name"], num_labels=4
-    ).to("cuda")
 
 
 def main():
