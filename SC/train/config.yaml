@@ -1,8 +1,8 @@
-seed: 42
-device: "cuda:0"
+seed: 0
+gpu: 0
 
 data:
-  folder_path: ./Dataset/
+  folder_path: ./data/
 
 model:
   name: "microsoft/deberta-v3-base"
@@ -37,6 +37,3 @@ eval:
 save:
   strategy: "steps"
   steps: 100
-
-test:
-  pipeline_aggregation_strategy: "simple"

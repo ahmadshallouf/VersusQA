@@ -2,8 +2,8 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 
 # read the data
-train_df = pd.read_csv("./Dataset/comparg_train.tsv", sep="\t")
-test_df = pd.read_csv("./Dataset/comparg_test.tsv", sep="\t")
+train_df = pd.read_csv("./data/comparg_train.tsv", sep="\t")
+test_df = pd.read_csv("./data/comparg_test.tsv", sep="\t")
 
 # only keep the columns answer, answer_stance, object_1 and object_2
 train_df = train_df[["object_0", "object_1", "answer", "labels"]]
@@ -41,9 +41,9 @@ test_df = test_df.rename(columns={"answer": "x"})
 train_df = train_df[["x", "y"]]
 test_df = test_df[["x", "y"]]
 
-# save the new dataset to a csv file with same name as the original file but in folder Dataset
+# save the new dataset to a csv file with same name as the original file but in folder data
 # original file name is in variable file
 train, val = train_test_split(train_df, test_size=0.1)
-train.to_csv("./Dataset/train2.csv", index=False, sep="\t")
-val.to_csv("./Dataset/val2.csv", index=False, sep="\t")
-test_df.to_csv("./Dataset/test2.csv", index=False, sep="\t")
+train.to_csv("./data/train2.csv", index=False, sep="\t")
+val.to_csv("./data/val2.csv", index=False, sep="\t")
+test_df.to_csv("./data/test2.csv", index=False, sep="\t")

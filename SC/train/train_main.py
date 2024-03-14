@@ -1,16 +1,13 @@
-import gc
 import os
 
 import evaluate
 import numpy as np
 import pandas as pd
-import torch
+import transformers
 import yaml
 from datasets import Dataset
 from datasets.dataset_dict import DatasetDict
 from ray import tune
-from ray.tune.schedulers import PopulationBasedTraining
-from sklearn.model_selection import KFold, train_test_split
 from transformers import (
     AutoModelForSequenceClassification,
     AutoTokenizer,
@@ -33,7 +30,7 @@ def load_config(config_name):
     return config
 
 
-config = load_config("configuration.yaml")
+config = load_config("config.yaml")
 
 
 def hp_space(trial):
@@ -82,17 +79,16 @@ def model_init():
 
 
 def main():
-    torch.cuda.empty_cache()
-    gc.collect()
+    transformers.set_seed(config["seed"])
 
-    os.environ["WANDB_PROJECT"] = "final-csi-" + config["log"]["run_name"]
-    # os.environ["WANDB_LOG_MODEL"] = "end"
+    os.environ["WANDB_PROJECT"] = "draft-csi-" + config["log"]["run_name"]
+    os.environ["WANDB_LOG_MODEL"] = "end"
     os.environ["WANDB_WATCH"] = "all"
     os.environ["WANDB_SILENT"] = "false"
 
-    train = pd.read_csv("Dataset/train.csv", sep="\t")
-    val = pd.read_csv("Dataset/val.csv", sep="\t")
-    test = pd.read_csv("Dataset/test.csv", sep="\t")
+    train = pd.read_csv("data/train.csv", sep="\t")
+    val = pd.read_csv("data/val.csv", sep="\t")
+    test = pd.read_csv("data/test.csv", sep="\t")
 
     d = {
         "train": Dataset.from_dict(
