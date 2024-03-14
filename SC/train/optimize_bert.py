@@ -1,46 +1,43 @@
 import os
 
-import evaluate
-import numpy as np
 import pandas as pd
 import transformers
-import yaml
 from datasets import Dataset
 from datasets.dataset_dict import DatasetDict
 from ray import tune
+from ray.tune.schedulers import ASHAScheduler
+from ray.tune.search.hyperopt import HyperOptSearch
 from transformers import (
-    AutoModelForSequenceClassification,
     AutoTokenizer,
     Trainer,
     TrainingArguments,
 )
-
-CONFIG_PATH = ""
-
-F1_METRIC = evaluate.load("f1")
-RECALL_METRIC = evaluate.load("recall")
-PRECISION_METRIC = evaluate.load("precision")
-ACCURACY_METRIC = evaluate.load("accuracy")
-
+from utils_bert import (
+    compute_metrics,
+    compute_objective,
+    load_config,
+    model_init_helper,
+    tokenize_function,
+)
 
 config = load_config("config.yaml")
 
 
-# TODO: rename
-def hp_space(trial):
+def raytune_hp_space(trial):
     return {
-        "learning_rate": tune.loguniform(1e-6, 1e-4),
+        "learning_rate": tune.choice([1e-5, 3e-5, 5e-5, 7e-5, 1e-4]),
         "per_device_train_batch_size": tune.choice([8, 16]),
-        "num_train_epochs": tune.choice([3, 4, 5, 6]),
-        # "warmup_steps": tune.uniform(0, 500),
-        # "seed": tune.uniform(2, 42)
+        "num_train_epochs": tune.randint(3, 20),
+        "weight_decay": tune.choice([1e-4, 1e-3, 1e-2, 1e-1]),
+        "warmup_steps": tune.choice([100, 200, 300, 400]),
     }
 
 
-def main():
+def optimize_bert():
+    # os.environ["CUDA_VISIBLE_DEVICES"] = str(config["gpu"])
     transformers.set_seed(config["seed"])
 
-    os.environ["WANDB_PROJECT"] = "draft-csi-" + config["log"]["run_name"]
+    os.environ["WANDB_PROJECT"] = "optimize-sc-" + config["log"]["run_name"]
     os.environ["WANDB_LOG_MODEL"] = "end"
     os.environ["WANDB_WATCH"] = "all"
     os.environ["WANDB_SILENT"] = "false"
@@ -79,14 +76,17 @@ def main():
         ),
     }
 
-    global tokenizer
     tokenizer = AutoTokenizer.from_pretrained(
         config["model"]["name"], padding="max_length", truncation=True
     )
 
     dataset = DatasetDict(d)
 
-    tokenized_datasets = dataset.map(tokenize_function, batched=True)
+    tokenized_datasets = dataset.map(
+        tokenize_function,
+        batched=True,
+        fn_kwargs={"tokenizer": tokenizer},
+    )
 
     training_args = TrainingArguments(
         output_dir=f"./{config['log']['run_name']}-finetuned-obj/",
@@ -100,9 +100,9 @@ def main():
     )
     training_args.set_dataloader(
         sampler_seed=config["seed"],
-        train_batch_size=config["train"]["batch_size"],
+        # train_batch_size=config["train"]["batch_size"],
         eval_batch_size=config["eval"]["batch_size"],
-    )  # auto_find_batch_size=True
+    )
     training_args.set_evaluate(
         strategy=config["eval"]["strategy"],
         steps=config["eval"]["steps"],
@@ -116,25 +116,25 @@ def main():
         first_step=config["log"]["first_step"],
         level=config["log"]["level"],
     )
-    # training_args.set_lr_scheduler(name=config["lr_name"],
-    #                               warmup_steps=config["lr_warmup_steps"])
-    training_args.set_optimizer(
-        name=config["optimizer_name"],
-        learning_rate=config["optimizer_learning_rate"],
-    )
-    #                           weight_decay=config["lr_weight_decay"])
-    # args.set_save(strategy=config["save"]["strategy"], steps=config["save"]["steps"])
-    # args.set_testing() # test_batch_size = eval
-    training_args.set_training(
-        num_epochs=config["train"]["num_epochs"],
-        batch_size=config["train"]["batch_size"],
+    training_args.set_lr_scheduler(
+        name=config["learning_rate_scheduler"]["name"],
+        # warmup_steps=config["learning_rate_scheduler"]["warmup_steps"],
     )
 
-    model = model_init()
+    training_args.set_optimizer(
+        name=config["optimizer"]["name"],
+        # learning_rate=config["optimizer"]["learning_rate"],
+        # weight_decay=config["optimizer"]["weight_decay"],
+    )
+    # args.set_save(strategy=config["save"]["strategy"], steps=config["save"]["steps"])
+    training_args.set_testing(batch_size=config["test"]["batch_size"])
+    # training_args.set_training(
+    #     num_epochs=config["train"]["num_epochs"],
+    #     batch_size=config["train"]["batch_size"],
+    # )
 
     trainer = Trainer(
-        model=model,
-        # model_init=model_init,
+        model_init=model_init_helper(),
         args=training_args,
         train_dataset=tokenized_datasets["train"],
         eval_dataset=tokenized_datasets["validation"],
@@ -142,41 +142,19 @@ def main():
         tokenizer=tokenizer,
     )
 
-    # best_trial = trainer.hyperparameter_search(
-    #     direction="maximize",
-    #     backend="ray",
-    #     n_trials=10,
-    #     hp_space=hp_space,
-    #     scheduler=PopulationBasedTraining(metric="objective", mode="max",
-    #                                       hyperparam_mutations=hp_space("trial")),
-    # )
-    # print(best_trial)
+    print("Hyperparameter Search")
+    best_trial = trainer.hyperparameter_search(
+        direction="maximize",
+        backend="ray",
+        hp_space=raytune_hp_space,
+        compute_objective=compute_objective,
+        n_trials=1,
+        search_alg=HyperOptSearch(metric="objective", mode="max"),
+        scheduler=ASHAScheduler(metric="objective", mode="max"),
+        log_to_file=True,
+    )
 
-    print("Training")
-    trainer.train()
-
-    print("Inference")
-    results_file = open(f"{config['log']['run_name']}-final.txt", "w")
-    results_file.write("Testing None\n")
-    results = trainer.evaluate(eval_dataset=tokenized_datasets["test_none"])
-    results_file.writelines([f"{results}", "\n"])
-
-    results_file.write("Testing Better\n")
-    results = trainer.evaluate(eval_dataset=tokenized_datasets["test_better"])
-    results_file.writelines([f"{results}", "\n"])
-
-    results_file.write("Testing Worse\n")
-    results = trainer.evaluate(eval_dataset=tokenized_datasets["test_worse"])
-    results_file.writelines([f"{results}", "\n"])
-
-    results_file.write("Testing Whole\n")
-    results = trainer.evaluate(eval_dataset=tokenized_datasets["test"])
-    results_file.writelines([f"{results}", "\n"])
-    results_file.close()
-
-    print("Save the model")
-    model.save_pretrained(f"./{config['log']['run_name']}-best/")
-    tokenizer.save_pretrained(f"./{config['log']['run_name']}-best/")
+    print("Best trial:", best_trial)
 
 
-main()
+optimize_bert()

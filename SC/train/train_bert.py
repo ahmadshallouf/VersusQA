@@ -9,15 +9,22 @@ from transformers import (
     Trainer,
     TrainingArguments,
 )
-from utils_bert import compute_metrics, load_config, model_init, tokenize_function
+from utils_bert import (
+    compute_metrics,
+    load_config,
+    model_init,
+    model_init_helper,
+    tokenize_function,
+)
 
 config = load_config("config.yaml")
 
 
-def main():
+def train_bert():
+    # os.environ["CUDA_VISIBLE_DEVICES"] = str(config["gpu"])
     transformers.set_seed(config["seed"])
 
-    os.environ["WANDB_PROJECT"] = "draft-csi-" + config["log"]["run_name"]
+    os.environ["WANDB_PROJECT"] = "train-cs-" + config["log"]["run_name"]
     os.environ["WANDB_LOG_MODEL"] = "end"
     os.environ["WANDB_WATCH"] = "all"
     os.environ["WANDB_SILENT"] = "false"
@@ -56,7 +63,6 @@ def main():
         ),
     }
 
-    global tokenizer
     tokenizer = AutoTokenizer.from_pretrained(
         config["model"]["name"], padding="max_length", truncation=True
     )
@@ -115,23 +121,13 @@ def main():
     )
 
     trainer = Trainer(
-        model=model_init(),
+        model=model_init_helper()(),
         args=training_args,
         train_dataset=tokenized_datasets["train"],
         eval_dataset=tokenized_datasets["validation"],
         compute_metrics=compute_metrics,
         tokenizer=tokenizer,
     )
-
-    # best_trial = trainer.hyperparameter_search(
-    #     direction="maximize",
-    #     backend="ray",
-    #     n_trials=10,
-    #     hp_space=hp_space,
-    #     scheduler=PopulationBasedTraining(metric="objective", mode="max",
-    #                                       hyperparam_mutations=hp_space("trial")),
-    # )
-    # print(best_trial)
 
     print("Training")
     trainer.train()
@@ -159,4 +155,4 @@ def main():
     trainer.save_pretrained(f"./{config['log']['run_name']}-best/")
 
 
-main()
+train_bert()

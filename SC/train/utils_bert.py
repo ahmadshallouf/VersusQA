@@ -1,3 +1,4 @@
+import copy
 import os
 
 import evaluate
@@ -5,7 +6,8 @@ import numpy as np
 import yaml
 from transformers import AutoModelForSequenceClassification
 
-CONFIG_PATH = "./"
+CONFIG_PATH = "/home/hherasimchyk/VersusQACopy/VersusQA/SC/train/"
+# TODO: load config here
 
 
 def load_config(config_name):
@@ -18,6 +20,16 @@ def load_config(config_name):
 def tokenize_function(examples, **kwargs):
     tokenizer = kwargs["tokenizer"]
     return tokenizer(examples["text"])
+
+
+def model_init_helper(config=load_config("config.yaml")):
+    def model_init():
+        nonlocal config
+        return AutoModelForSequenceClassification.from_pretrained(
+            config["model"]["name"], num_labels=4
+        )
+
+    return model_init
 
 
 def compute_metrics(eval_pred):
@@ -50,7 +62,6 @@ def compute_metrics(eval_pred):
     return results
 
 
-def model_init(config=load_config("config.yaml")):
-    return AutoModelForSequenceClassification.from_pretrained(
-        config["model"]["name"], num_labels=4
-    )
+def compute_objective(metrics):
+    metrics = copy.deepcopy(metrics)
+    return metrics["eval_f1"]
