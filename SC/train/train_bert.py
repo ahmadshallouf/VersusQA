@@ -12,7 +12,6 @@ from transformers import (
 from utils_bert import (
     compute_metrics,
     load_config,
-    model_init,
     model_init_helper,
     tokenize_function,
 )

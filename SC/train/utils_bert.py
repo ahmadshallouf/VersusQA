@@ -6,8 +6,7 @@ import numpy as np
 import yaml
 from transformers import AutoModelForSequenceClassification
 
-CONFIG_PATH = "/home/hherasimchyk/VersusQACopy/VersusQA/SC/train/"
-# TODO: load config here
+CONFIG_PATH = "/home/user/VersusQA/SC/train/"
 
 
 def load_config(config_name):
