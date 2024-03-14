@@ -23,7 +23,7 @@ def train_bert():
     # os.environ["CUDA_VISIBLE_DEVICES"] = str(config["gpu"])
     transformers.set_seed(config["seed"])
 
-    os.environ["WANDB_PROJECT"] = "reproduce-" + config["log"]["run_name"]
+    os.environ["WANDB_PROJECT"] = "train-oai-" + config["log"]["run_name"]
     os.environ["WANDB_LOG_MODEL"] = "end"
     os.environ["WANDB_WATCH"] = "all"
     os.environ["WANDB_SILENT"] = "false"

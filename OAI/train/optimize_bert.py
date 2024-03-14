@@ -37,7 +37,7 @@ def optimize_bert():
     # os.environ["CUDA_VISIBLE_DEVICES"] = str(config["gpu"])
     transformers.set_seed(config["seed"])
 
-    os.environ["WANDB_PROJECT"] = "optimize-" + config["log"]["run_name"]
+    os.environ["WANDB_PROJECT"] = "optimize-oai-" + config["log"]["run_name"]
     os.environ["WANDB_LOG_MODEL"] = "end"
     os.environ["WANDB_WATCH"] = "all"
     os.environ["WANDB_SILENT"] = "false"
@@ -91,7 +91,7 @@ def optimize_bert():
         sampler_seed=config["seed"],
         # train_batch_size=config["train"]["batch_size"],
         eval_batch_size=config["eval"]["batch_size"],
-    )  # auto_find_batch_size=True
+    )
     args.set_evaluate(
         strategy=config["eval"]["strategy"],
         steps=config["eval"]["steps"],
