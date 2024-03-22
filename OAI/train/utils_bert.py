@@ -83,7 +83,7 @@ def tokenize_and_align_labels(examples, one_label_per_word=True, **kwargs):
                 new_labels.append(-100 if one_label_per_word else lab)
         labels.append(new_labels)
 
-    tokenized_inputs["new_labels"] = labels
+    tokenized_inputs["labels"] = labels
     return tokenized_inputs
 
 
@@ -96,6 +96,8 @@ def model_init_helper(config=load_config("config.yaml")):
             config["model"]["name"],
             id2label=id2label,
             label2id=label2id,
+            # max_position_embeddings=config["model"]["model_max_length"],
+            ignore_mismatched_sizes=True,
         )
         print(f"{model.config.num_labels = }")
         return model
@@ -154,9 +156,12 @@ def evaluate_dataset(
 
     df = pd.DataFrame(
         {
-            "words": trainer.tokenizer.batch_decode(results.inputs),
+            "words": trainer.tokenizer.batch_decode(tokenized_dataset["input_ids"]),
             "labels": true_labels,
             "predictions": true_predictions,
         }
     )
-    df.to_csv(f"{config['log']['run_name']}-{metric_prefix}.csv", index=False)
+    df.to_csv(
+        f"./results/{config['log']['run_name']}-{metric_prefix}.csv",
+        index=False,
+    )

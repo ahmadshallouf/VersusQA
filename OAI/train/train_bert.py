@@ -1,5 +1,6 @@
 import os
 
+import pandas as pd
 import transformers
 from datasets import Dataset, DatasetDict
 from transformers import (
@@ -10,6 +11,7 @@ from transformers import (
 )
 from utils_bert import (
     compute_metrics,
+    evaluate_dataset,
     load_config,
     model_init_helper,
     read_data,
@@ -21,6 +23,8 @@ config = load_config("config.yaml")
 
 def train_bert():
     # os.environ["CUDA_VISIBLE_DEVICES"] = str(config["gpu"])
+
+    # uncomment to set a fixed seed
     transformers.set_seed(config["seed"])
 
     os.environ["WANDB_PROJECT"] = "train-oai-" + config["log"]["run_name"]
@@ -65,8 +69,8 @@ def train_bert():
     args = TrainingArguments(
         output_dir=f"./{config['log']['run_name']}-finetuned-obj/",
         overwrite_output_dir=f"./{config['log']['run_name']}-finetuned-obj/",
-        seed=config["seed"],
-        data_seed=config["seed"],
+        seed=config["seed"],  # uncomment for a fixed seed
+        data_seed=config["seed"],  # uncomment for a fixed seed
         run_name=config["log"]["run_name"],
         load_best_model_at_end=f"./{config['log']['run_name']}-best-end/",
         metric_for_best_model=config["model"]["metric_for_best"],
@@ -74,10 +78,10 @@ def train_bert():
         include_inputs_for_metrics=True,
     )
     args.set_dataloader(
-        sampler_seed=config["seed"],
+        sampler_seed=config["seed"],  # uncomment for a fixed seed
         train_batch_size=config["train"]["batch_size"],
         eval_batch_size=config["eval"]["batch_size"],
-    )  # auto_find_batch_size=True
+    )
     args.set_evaluate(
         strategy=config["eval"]["strategy"],
         steps=config["eval"]["steps"],
@@ -101,7 +105,7 @@ def train_bert():
         learning_rate=config["optimizer"]["learning_rate"],
         weight_decay=config["optimizer"]["weight_decay"],
     )
-    # args.set_save(strategy=config["save"]["strategy"], steps=config["save"]["steps"])
+    args.set_save(strategy=config["save"]["strategy"], steps=config["save"]["steps"])
     args.set_testing(batch_size=config["test"]["batch_size"])
     args.set_training(
         num_epochs=config["train"]["num_epochs"],
@@ -122,19 +126,33 @@ def train_bert():
     trainer.train()
 
     print("Inference")
-    results_file = open(f"{config['log']['run_name']}-final.txt", "w")
-    results_file.write("Training\n")
     results = trainer.evaluate(eval_dataset=tokenized_datasets["train"])
-    results_file.writelines([f"{results}", "\n"])
+    results.update({"dataset": "train"})
+    print_header = False
+    if not os.path.exists("./results/"):
+        os.mkdir("./results/")
+    if not os.path.exists(f"./results/{config['log']['run_name']}-oai.csv"):
+        print_header = True
+    results_df = pd.DataFrame([results])
 
-    results_file.write("Validating\n")
     results = trainer.evaluate(eval_dataset=tokenized_datasets["valid"])
-    results_file.writelines([f"{results}", "\n"])
+    results.update({"dataset": "valid"})
+    results_df = pd.concat([results_df, pd.DataFrame([results])])
 
-    results_file.write("Testing\n")
     results = trainer.evaluate(eval_dataset=tokenized_datasets["test"])
-    results_file.writelines([f"{results}", "\n"])
-    results_file.close()
+    results.update({"dataset": "test"})
+    results_df = pd.concat([results_df, pd.DataFrame([results])])
+
+    results_df.to_csv(
+        f"./results/{config['log']['run_name']}-oai.csv",
+        mode="a",
+        index=False,
+        header=print_header,
+    )
+
+    evaluate_dataset(trainer, tokenized_datasets["train"], "train")
+    evaluate_dataset(trainer, tokenized_datasets["valid"], "valid")
+    evaluate_dataset(trainer, tokenized_datasets["test"], "test")
 
     print("Save the model")
     trainer.save_model(f"./{config['log']['run_name']}-best/")
