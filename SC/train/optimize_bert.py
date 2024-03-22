@@ -1,7 +1,6 @@
 import os
 
 import pandas as pd
-import transformers
 from datasets import Dataset
 from datasets.dataset_dict import DatasetDict
 from ray import tune
@@ -35,7 +34,9 @@ def raytune_hp_space(trial):
 
 def optimize_bert():
     # os.environ["CUDA_VISIBLE_DEVICES"] = str(config["gpu"])
-    transformers.set_seed(config["seed"])
+
+    # uncomment to set a fixed seed
+    # transformers.set_seed(config["seed"])
 
     os.environ["WANDB_PROJECT"] = "optimize-sc-" + config["log"]["run_name"]
     os.environ["WANDB_LOG_MODEL"] = "end"
@@ -91,16 +92,15 @@ def optimize_bert():
     training_args = TrainingArguments(
         output_dir=f"./{config['log']['run_name']}-finetuned-obj/",
         overwrite_output_dir=f"./{config['log']['run_name']}-finetuned-obj/",
-        seed=config["seed"],
-        data_seed=config["seed"],
+        # seed=config["seed"],              # uncomment to set a fixed seed
+        # data_seed=config["seed"],         # uncomment to set a fixed seed
         run_name=config["log"]["run_name"],
         load_best_model_at_end=f"./{config['log']['run_name']}-best/",
         metric_for_best_model=config["model"]["metric_for_best"],
         evaluation_strategy=config["eval"]["strategy"],
     )
     training_args.set_dataloader(
-        sampler_seed=config["seed"],
-        # train_batch_size=config["train"]["batch_size"],
+        # sampler_seed=config["seed"],      # uncomment to set a fixed seed
         eval_batch_size=config["eval"]["batch_size"],
     )
     training_args.set_evaluate(
@@ -118,20 +118,12 @@ def optimize_bert():
     )
     training_args.set_lr_scheduler(
         name=config["learning_rate_scheduler"]["name"],
-        # warmup_steps=config["learning_rate_scheduler"]["warmup_steps"],
     )
 
     training_args.set_optimizer(
         name=config["optimizer"]["name"],
-        # learning_rate=config["optimizer"]["learning_rate"],
-        # weight_decay=config["optimizer"]["weight_decay"],
     )
-    # args.set_save(strategy=config["save"]["strategy"], steps=config["save"]["steps"])
     training_args.set_testing(batch_size=config["test"]["batch_size"])
-    # training_args.set_training(
-    #     num_epochs=config["train"]["num_epochs"],
-    #     batch_size=config["train"]["batch_size"],
-    # )
 
     trainer = Trainer(
         model_init=model_init_helper(),
@@ -148,7 +140,7 @@ def optimize_bert():
         backend="ray",
         hp_space=raytune_hp_space,
         compute_objective=compute_objective,
-        n_trials=1,
+        n_trials=20,
         search_alg=HyperOptSearch(metric="objective", mode="max"),
         scheduler=ASHAScheduler(metric="objective", mode="max"),
         log_to_file=True,
@@ -157,4 +149,5 @@ def optimize_bert():
     print("Best trial:", best_trial)
 
 
-optimize_bert()
+if __name__ == "__main__":
+    optimize_bert()
