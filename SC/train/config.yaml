@@ -5,7 +5,7 @@ data:
   folder_path: ./data/
 
 model:
-  name: "microsoft/deberta-v3-base"
+  name: "microsoft/deberta-v3-large"
   load_best_at_end: True
   metric_for_best: "eval_f1"
 
@@ -14,18 +14,18 @@ log:
   steps: 100
   report_to: ["wandb"]
   first_step: True
-  run_name: "microsoft-deberta-v3-base"
+  run_name: "microsoft-deberta-v3-large"
   level: "info"
 
 train:
   overwrite_checkpoint_path: True
-  num_epochs: 4
-  batch_size: 12
+  num_epochs: 13
+  batch_size: 16
 
 optimizer:
   name: "adamw_torch"
-  learning_rate: 6.05E-05
-  weight_decay: 0.01
+  learning_rate: 0.00003
+  weight_decay: 0.1
 
 learning_rate_scheduler:
   name: "cosine"
