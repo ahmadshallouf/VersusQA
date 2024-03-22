@@ -25,7 +25,8 @@ def model_init_helper(config=load_config("config.yaml")):
     def model_init():
         nonlocal config
         return AutoModelForSequenceClassification.from_pretrained(
-            config["model"]["name"], num_labels=4
+            config["model"]["name"],
+            num_labels=4,
         )
 
     return model_init

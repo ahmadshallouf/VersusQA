@@ -21,6 +21,8 @@ config = load_config("config.yaml")
 
 def train_bert():
     # os.environ["CUDA_VISIBLE_DEVICES"] = str(config["gpu"])
+
+    # uncomment to set a fixed seed
     transformers.set_seed(config["seed"])
 
     os.environ["WANDB_PROJECT"] = "train-cs-" + config["log"]["run_name"]
@@ -77,15 +79,15 @@ def train_bert():
     training_args = TrainingArguments(
         output_dir=f"./{config['log']['run_name']}-finetuned-obj/",
         overwrite_output_dir=f"./{config['log']['run_name']}-finetuned-obj/",
-        seed=config["seed"],
-        data_seed=config["seed"],
+        seed=config["seed"],  # uncomment to set a fixed seed
+        data_seed=config["seed"],  # uncomment to set a fixed seed
         run_name=config["log"]["run_name"],
         load_best_model_at_end=f"./{config['log']['run_name']}-best/",
         metric_for_best_model=config["model"]["metric_for_best"],
         evaluation_strategy=config["eval"]["strategy"],
     )
     training_args.set_dataloader(
-        sampler_seed=config["seed"],
+        sampler_seed=config["seed"],  # uncomment to set a fixed seed
         train_batch_size=config["train"]["batch_size"],
         eval_batch_size=config["eval"]["batch_size"],
     )
@@ -112,7 +114,9 @@ def train_bert():
         learning_rate=config["optimizer"]["learning_rate"],
         weight_decay=config["optimizer"]["weight_decay"],
     )
-    # args.set_save(strategy=config["save"]["strategy"], steps=config["save"]["steps"])
+    training_args.set_save(
+        strategy=config["save"]["strategy"], steps=config["save"]["steps"]
+    )
     training_args.set_testing(batch_size=config["test"]["batch_size"])
     training_args.set_training(
         num_epochs=config["train"]["num_epochs"],
@@ -132,26 +136,45 @@ def train_bert():
     trainer.train()
 
     print("Inference")
-    results_file = open(f"{config['log']['run_name']}-final.txt", "w")
-    results_file.write("Testing None\n")
-    results = trainer.evaluate(eval_dataset=tokenized_datasets["test_none"])
-    results_file.writelines([f"{results}", "\n"])
+    results = trainer.evaluate(eval_dataset=tokenized_datasets["train"])
+    results.update({"dataset": "train"})
+    print_header = False
+    if not os.path.exists("./results/"):
+        os.mkdir("./results/")
+    if not os.path.exists(f"./results/{config['log']['run_name']}-sc.csv"):
+        print_header = True
+    results_df = pd.DataFrame([results])
 
-    results_file.write("Testing Better\n")
-    results = trainer.evaluate(eval_dataset=tokenized_datasets["test_better"])
-    results_file.writelines([f"{results}", "\n"])
+    results = trainer.evaluate(eval_dataset=tokenized_datasets["validation"])
+    results.update({"dataset": "valid"})
+    results_df = pd.concat([results_df, pd.DataFrame([results])])
 
-    results_file.write("Testing Worse\n")
-    results = trainer.evaluate(eval_dataset=tokenized_datasets["test_worse"])
-    results_file.writelines([f"{results}", "\n"])
-
-    results_file.write("Testing Whole\n")
     results = trainer.evaluate(eval_dataset=tokenized_datasets["test"])
-    results_file.writelines([f"{results}", "\n"])
-    results_file.close()
+    results.update({"dataset": "test"})
+    results_df = pd.concat([results_df, pd.DataFrame([results])])
+
+    results = trainer.evaluate(eval_dataset=tokenized_datasets["test_better"])
+    results.update({"dataset": "test_better"})
+    results_df = pd.concat([results_df, pd.DataFrame([results])])
+
+    results = trainer.evaluate(eval_dataset=tokenized_datasets["test_worse"])
+    results.update({"dataset": "test_worse"})
+    results_df = pd.concat([results_df, pd.DataFrame([results])])
+
+    results = trainer.evaluate(eval_dataset=tokenized_datasets["test_none"])
+    results.update({"dataset": "test_none"})
+    results_df = pd.concat([results_df, pd.DataFrame([results])])
+
+    results_df.to_csv(
+        f"./results/{config['log']['run_name']}-sc.csv",
+        mode="a",
+        index=False,
+        header=print_header,
+    )
 
     print("Save the model")
     trainer.save_pretrained(f"./{config['log']['run_name']}-best/")
 
 
-train_bert()
+if __name__ == "__main__":
+    train_bert()
